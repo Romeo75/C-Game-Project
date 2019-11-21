@@ -1,0 +1,12 @@
+Fonctions du projet
+
+-Sprite ship and background (done)
+-Mouvement with drag (done)
+-Frame limits (done)
+-Correct the image of the sprite ship in photoshop
+-creation of the rotation of the sprite
+-Redifine variables as part of the object ship (introduction of objects)
+-creation of the foncton shoot
+-redifine funcitons 'deriv' as methods of the objects (so we can treat objects independantly)
+-create Object Ship
+-change triangle shape
