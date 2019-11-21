@@ -10,3 +10,12 @@ Fonctions du projet
 -redifine funcitons 'deriv' as methods of the objects (so we can treat objects independantly)
 -create Object Ship
 -change triangle shape
+
+
+-------External links---------
+
+******___SFML___**************
+
+https://www.sfml-dev.org/tutorials/2.0/graphics-shape-fr.php
+
+https://www.sfml-dev.org/tutorials/2.5/graphics-transform.php
