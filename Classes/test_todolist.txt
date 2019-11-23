@@ -20,6 +20,12 @@ https://www.sfml-dev.org/tutorials/2.0/graphics-shape-fr.php
 
 https://www.sfml-dev.org/tutorials/2.5/graphics-transform.php
 
-https://www.c-sharpcorner.com/UploadFile/3d39b4/virtual-method-in-C-Sharp/
+----------C++ classes-----------
 
-https://isocpp.org/wiki/faq/strange-inheritance
+https://stackoverflow.com/questions/17999472/creating-a-list-to-hold-objects-in-c  //To define the forces inside shot::dynamics
+
+https://katyscode.wordpress.com/2012/06/13/coding-challenge-write-asteroids-in-10-hours-or-less/  //To define the method ship::Fire()
+
+https://www.c-sharpcorner.com/UploadFile/3d39b4/virtual-method-in-C-Sharp/  //To override the base method dynamics
+
+https://isocpp.org/wiki/faq/strange-inheritance // Understand inheritance also look for inheritance what om never told you c++
