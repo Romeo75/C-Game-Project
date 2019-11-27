@@ -3,24 +3,34 @@ Fonctions du projet
 -Sprite ship and background (done)
 -Mouvement with drag (done)
 -Frame limits (done)
--Correct the image of the sprite ship in photoshop
--creation of the rotation of the sprite
--Redifine variables as part of the object ship (introduction of objects)
--creation of the foncton shoot
--redifine funcitons 'deriv' as methods of the objects (so we can treat objects independantly)
--create Object Ship
--change triangle shape
+-Correct the image of the sprite ship in photoshop (done)
+-creation of the rotation of the sprite (done)
+-Redifine variables as part of the object ship - introduction of objects (done)
+-creation of the foncton shoot (done)
+-redifine fonction 'deriv' as a virtual method of the objects - so we can treat objects independantly (done)
+-create Object Ship (done)
+-change triangle shape (done)
+-create Object shot (done)
+
+-create a function double ExternalForces() that will update the forces of the vector each frame
+-create a class Planet(/asteroid) that will atract our bullets
 
 
--------External links---------
+-------------------------------------------------External links--------------------------------------------
 
-******___SFML___**************
+******************___SFML___********************
 
-https://www.sfml-dev.org/tutorials/2.0/graphics-shape-fr.php
+https://www.sfml-dev.org/tutorials/2.0/graphics-shape-fr.php //To test the methods created (it also helps if nothing is in display)
 
-https://www.sfml-dev.org/tutorials/2.5/graphics-transform.php
+https://www.sfml-dev.org/tutorials/2.5/graphics-transform.php //To implement a resize method so the frame resize if we go widescreen
 
-----------C++ classes-----------
+https://en.sfml-dev.org/forums/index.php?topic=20279.0 //To solve the problem of white boxes in sfml
+
+https://www.sfml-dev.org/tutorials/2.0/graphics-sprite-fr.php //To set the graphics within the game
+
+******************____C++ classes____********************
+
+https://www.geeksforgeeks.org/vector-in-cpp-stl/ // std::Vector object to store the <Shot> objects
 
 https://stackoverflow.com/questions/17999472/creating-a-list-to-hold-objects-in-c  //To define the forces inside shot::dynamics
 
