@@ -270,11 +270,6 @@ class space_object {
         this-> shape.setTexture(texture);
         this-> ObjectsInSpace.push_back(*this);
 
-        //-------For shapes objects--------\\\\
-        //this-> shape.setRadius(size);
-        //this-> shape.setPointCount(ShapePoints); For Shapes
-        //this-> shape.setFillColor(color);
-
     }
 
     space_object::space_object(int windowSizeX, int windowSizeY){
@@ -302,14 +297,6 @@ class Shot: public space_object {
         double createdTime;
 
 	public:
-
-        /* Sprite shapeShot;
-        Texture textureShot;
-
-        void draw2(RenderWindow& window){
-            window.draw(shapeShot);
-        }
-         */
         
         void UpdatePosition(){
             
@@ -319,10 +306,6 @@ class Shot: public space_object {
             ApplyLimits();
             shape.setPosition(x[0],y[0]);
             shape.setRotation(phy - 90);
-        /* 
-            shapeShot.setPosition(x[0],y[0]);
-            shapeShot.setRotation(phy - 90);
-         */    
 
         }    
 
@@ -428,11 +411,6 @@ class ship: public space_object{
                     
                     // Makes new Shot
                     Shot shot( "Boom... ", 30, Color::Black, "spaceMissil.png", 20, 35, 3e3, GetWindowSizeX(), GetWindowSizeY(), GetMaxSpeed(), x, y, phy + 180);
-
-                    /* //Prepares the vector
-                    shot.SetPosition( GetVectorX()[0], GetVectorY()[0] );
-                    shot.SetSpeed(GetDirectionX()*100,GetDirectionY()*100);
-                    shot.SetForces(0,0); */
                     
                     //Stores it in a vector
                     (this->ShotsInSpace).push_back(shot);
@@ -551,15 +529,6 @@ int main(){
             p.ShotsInSpace[0].GetAll();
 
          }
-       
-        /* 
-        //LOOOOOOOOOOOOOOOOOOOL
-        x[2]=10;y[2]=10;
-        Shot shot( "Boom... ", 30, Color::Black, "spaceMissil.png", 20, 35, 3e3, p.GetWindowSizeX(), p.GetWindowSizeY(), p.GetMaxSpeed(), x, y, p.phy);
-        shot.UpdatePosition();
-        shot.GetAll();
-        shot.draw(window);
-        */
         
         double sum = 0; //Test to see if it is possible to create the fonction force() using this method
         for (int i = 0 ; i < (p.ShotsInSpace).size(); i++){
