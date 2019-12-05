@@ -18,12 +18,6 @@ class space_object {
 
     	string name;
 
-        
-        double MaxSpeed;
-		double sizeX,sizeY;
-        static int windowSizeX;
-        static int windowSizeY;
-
         virtual void dynamics(int n, double t, double y[], double dy[]){
 
     		dy[0] = y[1];
@@ -32,6 +26,12 @@ class space_object {
 		}
 
     public:
+
+        double MaxSpeed;
+		double sizeX,sizeY;
+        static int windowSizeX;
+        static int windowSizeY;
+        int life;
     
         double x[3],y[3]; /*Canonical vectors, range 0 is the position of the object,
                     ranges above are the derivates in time
@@ -151,7 +151,7 @@ class space_object {
             return sqrt(dx2 + dy2);
 
         }
-        
+
         void rk4(int n, double x, double y[], double dx){
 
             /*-----------------------------------------
@@ -252,9 +252,10 @@ class space_object {
             <<  "   acceleration: ("<< x[2]<< ","<<y[2]<<")\n";
     }
 
-    space_object::space_object(string name, int ShapePoints, Color color, string picture, double sizeX, double sizeY, int windowSizeX, int windowSizeY, double MaxSpeed , double x[], double y[], double phy){
+    space_object::space_object(string name, int life, Color color, string picture, double sizeX, double sizeY, int windowSizeX, int windowSizeY, double MaxSpeed , double x[], double y[], double phy){
 
         this-> name = name;
+        this-> life = life;
         this-> sizeX = sizeX;
         this-> sizeY = sizeY;
         this-> windowSizeX = windowSizeX;
@@ -264,6 +265,7 @@ class space_object {
         for(int i=0; i<3; i ++) this-> x[i] = x[i];
         for(int i=0; i<3; i ++) this-> y[i] = y[i];
         this-> texture.loadFromFile(picture);
+        this-> texture.setSmooth(true);
         this-> shape.setTextureRect(IntRect(0,0,sizeX,sizeY));
         this-> shape.setOrigin(sizeX/2.,sizeY/2.);
         this-> shape.setRotation(phy - 90);
@@ -297,7 +299,7 @@ class Shot: public space_object {
         double createdTime;
 
 	public:
-        
+
         void UpdatePosition(){
             
             cout<< "\n........................BigLol........................"<<endl;
@@ -305,9 +307,19 @@ class Shot: public space_object {
             rk4(3, 0., y, 1e-1);
             ApplyLimits();
             shape.setPosition(x[0],y[0]);
-            shape.setRotation(phy - 90);
+            shape.setRotation(phy-90);
 
         }    
+
+        void externalForce(space_object& a){
+            
+            cout << "distance de la planete: " << distance(a);
+
+            x[2] = 1e2 * (a.x[0]-x[0])*pow(distance(a),-1);
+            y[2] = 1e2 * (a.y[0]-y[0])*pow(distance(a),-1);
+
+            
+        }
 
         // Remove a bullet if its TTL has expired
         bool Remove(){
@@ -394,6 +406,8 @@ class ship: public space_object{
         ship(int windowSizeX, int windowSizeY):space_object(windowSizeX,windowSizeY){};
         ~ship();
 };
+
+
 //Methods related to ship objects
 
     void ship::Fire(){
@@ -477,12 +491,41 @@ class ship: public space_object{
     }
     ship::~ship(){}
 
+//Class that defines the planets
+class planet: public space_object{
+
+    private:
+
+
+    public:
+        
+        void UpdatePosition(){
+                
+                cout<<"\nLOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOL";
+                rk4(3, 0., x, 1e-1);
+                rk4(3, 0., y, 1e-1);
+                ApplyLimits();
+                shape.setPosition(x[0],y[0]);
+                shape.setRotation(phy - 90);
+
+            }
+
+        double positionA(double sup){
+
+            return rand()%(int)abs(sup)-0.5*sup;
+
+        }
+
+        planet(string name, int ShapePoints, Color color, string picture, double sizeX, double sizeY, int windowSizeX, int windowSizeY, double MaxSpeed, double x[], double y[], double phy):space_object( name, ShapePoints, color, picture, sizeX, sizeY, windowSizeX, windowSizeY, MaxSpeed, x, y, phy){}
+
+
+};
 
 int main(){
 
     int windowSizeX = 800, windowSizeY = 600;
 	RenderWindow window(VideoMode(windowSizeX, windowSizeY), "Spacecraft Movement");
-    wi  ndow.setFramerateLimit(40);
+    window.setFramerateLimit(40);
 
     /// TEXTURES Of the Background\\\
     
@@ -491,17 +534,24 @@ int main(){
     t1.setRepeated(true);
     Sprite sFond(t1,IntRect(0,0,windowSizeX,windowSizeY));
 
-	double sizeX = 100, sizeY = 94; // dimensions of the ship
+	double sizeX = 100, sizeY = 94;     // dimensions of the ship
+    double sizePX = 215, sizePY = 211;  // dimensions of the planet
     double x[]={sizeX+100,0.,0.},y[]={sizeY+100,0.,0.}; // position initiale du cercle x[0],y[0], vitesse x[1], y[1] et acceleration x[3], x
 												// x[2] et y[2] Intensité des forces subies par le cercle exprimees dans la base canonique.
     int vmax = 100, maxShots = 10;
     double phy = 0;
+    double xprov = 0,yprov = 0; //For the autonomus rotation of the shot
 
-    //vector<ship> spacecraffts;
+    double sum = 0; //Test to see if it is possible to create the fonction force() using this method
 
 
-    ship p("player1", 3, Color::Green, "spaceShip.png", sizeX, sizeY, maxShots, windowSizeX, windowSizeY, vmax, x, y, phy);
-	//spacecraffts.push_back(p);
+    vector<planet> PlanetsInSpace;
+
+
+    ship p("player1", 300, Color::Green, "spaceShip.png", sizeX, sizeY, maxShots, windowSizeX, windowSizeY, vmax, x, y, phy);
+    
+    planet mars( "Mars", 300, Color::Blue, "meteor.png", sizePX, sizePY, windowSizeX, windowSizeY, vmax, x, y, phy );
+	PlanetsInSpace.push_back(mars);
 
     while (window.isOpen()){
 
@@ -513,12 +563,17 @@ int main(){
 
         //Sets the background
 		window.clear(Color::Black);
+        window.draw(sFond);        
+        
         //clears the terminal
         system("clear");
         
-        window.draw(sFond);        
-
-		//Get the input from the arrows in the keyboard
+    
+        mars.GetAll();
+        mars.UpdatePosition();
+        mars.SetForces( mars.positionA( windowSizeX), mars.positionA( windowSizeY) );
+		
+        //Get the input from the arrows in the keyboard
 		p.GetInput(3);
 
 
@@ -529,16 +584,27 @@ int main(){
             p.ShotsInSpace[0].GetAll();
 
          }
+       
         
-        double sum = 0; //Test to see if it is possible to create the fonction force() using this method
         for (int i = 0 ; i < (p.ShotsInSpace).size(); i++){
             
+            xprov = (p.ShotsInSpace[i]).x[0];   yprov = (p.ShotsInSpace[i]).y[0];
+
             ( p.ShotsInSpace[i] ).UpdatePosition();
             (p.ShotsInSpace[i]).texture.loadFromFile("spaceMissil.png");
             (p.ShotsInSpace[i]).shape.setTexture((p.ShotsInSpace[i]).texture);
-            (p.ShotsInSpace[i]).draw(window);
             (p.ShotsInSpace[i]).GetAll();
-
+            
+            cout << "\n Variation en y: " << (p.ShotsInSpace[i]).y[1] 
+                 << "\n Variation en x: " << (p.ShotsInSpace[i]).x[1]
+                 << "\n Angle par le Cosinus: "     << 180 + (180/M_PI) * acos(((p.ShotsInSpace[i]).x[1]) * pow( sqrt( pow(((p.ShotsInSpace[i]).x[1]), 2) + pow( ((p.ShotsInSpace[i]).y[1]), 2) ) ,-1)) 
+                 << "\n Angle par le Sinus: "       << 180 + (180/M_PI) * asin(((p.ShotsInSpace[i]).y[1]) * pow( sqrt( pow(((p.ShotsInSpace[i]).x[1]), 2) + pow( ((p.ShotsInSpace[i]).y[1]), 2) ) ,-1));
+            (p.ShotsInSpace[i]).phy = 180 + (180/M_PI) * acos(((p.ShotsInSpace[i]).x[1]) * pow( sqrt( pow(((p.ShotsInSpace[i]).x[1]), 2) + pow( ((p.ShotsInSpace[i]).y[1]), 2) ) ,-1));
+            //(p.ShotsInSpace[i]).phy = 180 + (180/M_PI) * asin(((p.ShotsInSpace[i]).y[1] ) * pow( sqrt( pow(((p.ShotsInSpace[i]).x[1] ), 2) + pow( ((p.ShotsInSpace[i]).y[1] ), 2) ) ,-1));
+ 
+            (p.ShotsInSpace[i]).externalForce(mars);
+            (p.ShotsInSpace[i]).draw(window);
+            
             sum += p.distance((p.ShotsInSpace)[i]);
 
             if( ((p.ShotsInSpace).front()).Remove() ) {
@@ -555,6 +621,7 @@ int main(){
 		//Check control
         p.GetAll();
 
+        window.draw(mars.shape);
         window.draw(p.shape);
         window.display();
 
@@ -563,3 +630,4 @@ int main(){
     p.~ship();
     return 0;
 }
+
