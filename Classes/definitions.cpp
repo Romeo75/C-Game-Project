@@ -523,35 +523,38 @@ class planet: public space_object{
 
 int main(){
 
-    int windowSizeX = 800, windowSizeY = 600;
-	RenderWindow window(VideoMode(windowSizeX, windowSizeY), "Spacecraft Movement");
-    window.setFramerateLimit(40);
 
-    /// TEXTURES Of the Background\\\
+    /// Properties Of the Background\\\
+        
+        int windowSizeX = 800, windowSizeY = 600;
+        RenderWindow window(VideoMode(windowSizeX, windowSizeY), "Spacecraft Movement");
+        window.setFramerateLimit(40);
+        Texture t1;
+        t1.loadFromFile("blue.png");
+        t1.setRepeated(true);
+        Sprite sFond(t1,IntRect(0,0,windowSizeX,windowSizeY));
+
+    /// Properties Of the Objects\\\
     
-    Texture t1;
-    t1.loadFromFile("blue.png");
-    t1.setRepeated(true);
-    Sprite sFond(t1,IntRect(0,0,windowSizeX,windowSizeY));
+        double textX = 0,textY = 0;
+        double sizeX = 100, sizeY = 94;     // dimensions of the ship
+        double sizePX = 215, sizePY = 211;  // dimensions of the planet
+        
+        double x[]={sizeX+100,0.,0.},y[]={sizeY+100,0.,0.}; // position initiale du veseau x[0],y[0], vitesse x[1], y[1] et acceleration x[3], x
+                                                            // x[2] et y[2] Intensité des forces subies par le cercle exprimees dans la base canonique.
+        int vmax = 100, maxShots = 10;
+        double phy = 0;
 
-	double sizeX = 100, sizeY = 94;     // dimensions of the ship
-    double sizePX = 215, sizePY = 211;  // dimensions of the planet
-    double x[]={sizeX+100,0.,0.},y[]={sizeY+100,0.,0.}; // position initiale du cercle x[0],y[0], vitesse x[1], y[1] et acceleration x[3], x
-												// x[2] et y[2] Intensité des forces subies par le cercle exprimees dans la base canonique.
-    int vmax = 100, maxShots = 10;
-    double phy = 0;
-    double xprov = 0,yprov = 0; //For the autonomus rotation of the shot
+        double sum = 0; //Test to see if it is possible to create the fonction force() using this method
 
-    double sum = 0; //Test to see if it is possible to create the fonction force() using this method
+    /// Objects \\\
 
-
-    vector<planet> PlanetsInSpace;
-
-
-    ship p("player1", 300, Color::Green, "spaceShip.png", sizeX, sizeY, maxShots, windowSizeX, windowSizeY, vmax, x, y, phy);
-    
-    planet mars( "Mars", 300, Color::Blue, "meteor.png", sizePX, sizePY, windowSizeX, windowSizeY, vmax, x, y, phy );
-	PlanetsInSpace.push_back(mars);
+        vector<planet> PlanetsInSpace;
+        ship p("player1", 300, Color::Green, "spaceShip.png", sizeX, sizeY, maxShots, windowSizeX, windowSizeY, vmax, x, y, phy);
+        planet mars( "Mars", 300, Color::Blue, "meteor.png", sizePX, sizePY, windowSizeX, windowSizeY, vmax, x, y, phy );
+        PlanetsInSpace.push_back(mars);
+        
+        Text PlayerLife;
 
     while (window.isOpen()){
 
@@ -560,14 +563,14 @@ int main(){
         while (window.pollEvent(event)){
             if (event.type == Event::Closed) window.close();
           }
+        //Closses the window
 
         //Sets the background
 		window.clear(Color::Black);
         window.draw(sFond);        
         
         //clears the terminal
-        system("clear");
-        
+        system("clear");    
     
         mars.GetAll();
         mars.UpdatePosition();
@@ -575,7 +578,6 @@ int main(){
 		
         //Get the input from the arrows in the keyboard
 		p.GetInput(3);
-
 
         if ( p.firing ){
             
@@ -585,35 +587,30 @@ int main(){
 
          }
        
-        
+        //Sequence that updates all of the shots in space
         for (int i = 0 ; i < (p.ShotsInSpace).size(); i++){
-            
-            xprov = (p.ShotsInSpace[i]).x[0];   yprov = (p.ShotsInSpace[i]).y[0];
 
-            ( p.ShotsInSpace[i] ).UpdatePosition();
+            (p.ShotsInSpace[i]).UpdatePosition();
             (p.ShotsInSpace[i]).texture.loadFromFile("spaceMissil.png");
             (p.ShotsInSpace[i]).shape.setTexture((p.ShotsInSpace[i]).texture);
             (p.ShotsInSpace[i]).GetAll();
-            
-            cout << "\n Variation en y: " << (p.ShotsInSpace[i]).y[1] 
-                 << "\n Variation en x: " << (p.ShotsInSpace[i]).x[1]
-                 << "\n Angle par le Cosinus: "     << 180 + (180/M_PI) * acos(((p.ShotsInSpace[i]).x[1]) * pow( sqrt( pow(((p.ShotsInSpace[i]).x[1]), 2) + pow( ((p.ShotsInSpace[i]).y[1]), 2) ) ,-1)) 
-                 << "\n Angle par le Sinus: "       << 180 + (180/M_PI) * asin(((p.ShotsInSpace[i]).y[1]) * pow( sqrt( pow(((p.ShotsInSpace[i]).x[1]), 2) + pow( ((p.ShotsInSpace[i]).y[1]), 2) ) ,-1));
             (p.ShotsInSpace[i]).phy = 180 + (180/M_PI) * acos(((p.ShotsInSpace[i]).x[1]) * pow( sqrt( pow(((p.ShotsInSpace[i]).x[1]), 2) + pow( ((p.ShotsInSpace[i]).y[1]), 2) ) ,-1));
-            //(p.ShotsInSpace[i]).phy = 180 + (180/M_PI) * asin(((p.ShotsInSpace[i]).y[1] ) * pow( sqrt( pow(((p.ShotsInSpace[i]).x[1] ), 2) + pow( ((p.ShotsInSpace[i]).y[1] ), 2) ) ,-1));
- 
+          //(p.ShotsInSpace[i]).phy = 180 + (180/M_PI) * asin(((p.ShotsInSpace[i]).y[1] ) * pow( sqrt( pow(((p.ShotsInSpace[i]).x[1] ), 2) + pow( ((p.ShotsInSpace[i]).y[1] ), 2) ) ,-1));
             (p.ShotsInSpace[i]).externalForce(mars);
             (p.ShotsInSpace[i]).draw(window);
             
+            cout << "\n Angle par le Cosinus: "     << 180 + (180/M_PI) * acos(((p.ShotsInSpace[i]).x[1]) * pow( sqrt( pow(((p.ShotsInSpace[i]).x[1]), 2) + pow( ((p.ShotsInSpace[i]).y[1]), 2) ) ,-1)) 
+                 << "\n Angle par le Sinus: "       << 180 + (180/M_PI) * asin(((p.ShotsInSpace[i]).y[1]) * pow( sqrt( pow(((p.ShotsInSpace[i]).x[1]), 2) + pow( ((p.ShotsInSpace[i]).y[1]), 2) ) ,-1));
+            
             sum += p.distance((p.ShotsInSpace)[i]);
 
+            //If the shot is no longer 
             if( ((p.ShotsInSpace).front()).Remove() ) {
                 p.EndFire();
                 (p.ShotsInSpace).erase((p.ShotsInSpace).begin());
             }
         }
         cout << "\nSum of bullets distace from ship: " << sum << endl; 
-        
 		
         //Update position of all the elements related to the player p
 		p.UpdatePosition();
