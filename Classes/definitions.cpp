@@ -586,7 +586,8 @@ int main(){
         Text PlayerLife;
         ostringstream dataPlayer1;
         
-        RectangleShape boundShip;
+        RectangleShape boundShip0;
+        RectangleShape boundShip1;
 
     while (window.isOpen()){
 
@@ -613,13 +614,24 @@ int main(){
             PlanetsInSpace[i].SetForces(PlanetsInSpace[0].RandPosition( windowSizeX), PlanetsInSpace[0].RandPosition( windowSizeY));
         }
 
-        boundShip.setOrigin(p.shape.getOrigin().x,p.shape.getOrigin().y);
-        boundShip.setPosition(p.shape.getPosition().x,p.shape.getPosition().y);
-        boundShip.setFillColor(Color::Transparent);
-        boundShip.setSize(sf::Vector2f(p.shape.getGlobalBounds().width,p.shape.getGlobalBounds().height));
-        boundShip.setOutlineThickness(10);
-        boundShip.setOutlineColor(Color::Magenta);
-        window.draw(boundShip);
+        //Planet 0
+        boundShip0.setOrigin(PlanetsInSpace[0].shape.getOrigin().x, PlanetsInSpace[0].shape.getOrigin().y);
+        boundShip0.setPosition(PlanetsInSpace[0].shape.getPosition().x, PlanetsInSpace[0].shape.getPosition().y);
+        boundShip0.setFillColor(Color::Transparent);
+        boundShip0.setSize(sf::Vector2f(PlanetsInSpace[0].shape.getGlobalBounds().width, PlanetsInSpace[0].shape.getGlobalBounds().height));
+        boundShip0.setOutlineThickness(5);
+        boundShip0.setOutlineColor(Color::Magenta);
+        window.draw(boundShip0);
+        
+        //Planet 1
+        boundShip1.setOrigin(PlanetsInSpace[1].shape.getOrigin().x, PlanetsInSpace[1].shape.getOrigin().y);
+        boundShip1.setPosition(PlanetsInSpace[1].shape.getPosition().x, PlanetsInSpace[1].shape.getPosition().y);
+        boundShip1.setFillColor(Color::Transparent);
+        boundShip1.setSize(sf::Vector2f(PlanetsInSpace[1].shape.getGlobalBounds().width, PlanetsInSpace[1].shape.getGlobalBounds().height));
+        boundShip1.setOutlineThickness(5);
+        boundShip1.setOutlineColor(Color::Magenta);
+        window.draw(boundShip1);
+
 
         //Get the input from the arrows in the keyboard for player1
 		p.GetInput(3);
@@ -643,17 +655,21 @@ int main(){
             cout << "\n Angle par le Cosinus: "     << 180 + (180/M_PI) * acos(((p.ShotsInSpace[i]).x[1]) * pow( sqrt( pow(((p.ShotsInSpace[i]).x[1]), 2) + pow( ((p.ShotsInSpace[i]).y[1]), 2) ) ,-1)) 
                  << "\n Angle par le Sinus: "       << 180 + (180/M_PI) * asin(((p.ShotsInSpace[i]).y[1]) * pow( sqrt( pow(((p.ShotsInSpace[i]).x[1]), 2) + pow( ((p.ShotsInSpace[i]).y[1]), 2) ) ,-1));
             (p.ShotsInSpace[i]).SetForces(0.,0.);
-            for (int l = 0 ; l < (PlanetsInSpace).size(); l++) (p.ShotsInSpace[i]).externalForce(PlanetsInSpace[l]);
+            
             (p.ShotsInSpace[i]).draw(window);
-            
-            
             sum += p.distance((p.ShotsInSpace)[i]);
+            
+            for (int l = 0 ; l < (PlanetsInSpace).size(); l++) (p.ShotsInSpace[i]).externalForce(PlanetsInSpace[l]);
 
             //If the shot is no longer permited then erase
-            if( (*( (p.ShotsInSpace).begin()+i )).LivingTime() ) {
+            if( (*( (p.ShotsInSpace).begin()+i )).LivingTime() || ( (p.ShotsInSpace)[i].shape.getGlobalBounds().intersects( PlanetsInSpace[0].shape.getGlobalBounds() ) ) || ( (p.ShotsInSpace)[i].shape.getGlobalBounds().intersects( PlanetsInSpace[1].shape.getGlobalBounds() ) )) {
                 p.EndFire();
-                (p.ShotsInSpace).erase((p.ShotsInSpace).begin()+ i || (*((p.ShotsInSpace).begin()+i)).distance(PlanetsInSpace[i]) < sqrt( pow((PlanetsInSpace[0].sizeX), 2) + pow((PlanetsInSpace[0].sizeY), 2) ) );
+                (p.ShotsInSpace).erase((p.ShotsInSpace).begin()+ i);
             }
+
+
+
+
         }
         cout << "\nSum of bullets distace from ship: " << sum << endl; 
 		
