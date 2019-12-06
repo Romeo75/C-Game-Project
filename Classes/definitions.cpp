@@ -1,8 +1,9 @@
 #include <cstdlib>
 #include <iostream>
+#include <sstream>
 #include <math.h>
 #include <vector>
-#include<chrono>
+#include <chrono>
 #include <SFML/Graphics.hpp> // un seul include suffit pour avoir les trois parties essentielles
 						     // de la SFML: graphics, window et system
 
@@ -32,6 +33,7 @@ class space_object {
         static int windowSizeX;
         static int windowSizeY;
         int life;
+        double gravity;
     
         double x[3],y[3]; /*Canonical vectors, range 0 is the position of the object,
                     ranges above are the derivates in time
@@ -208,7 +210,7 @@ class space_object {
         virtual void GetAll();
 
         //Constructors
-        space_object(string name, int ShapePoints, Color color, string picture, double sizeX, double sizeY, int windowSizeX, int windowSizeY, double MaxSpeed, double x[], double y[], double phy);
+        space_object(string name, double gravity, int life, Color color, string picture, double sizeX, double sizeY, int windowSizeX, int windowSizeY, double MaxSpeed, double x[], double y[], double phy);
         space_object(int windowSizeX, int windowSizeY);
 
         //Destructor
@@ -252,10 +254,11 @@ class space_object {
             <<  "   acceleration: ("<< x[2]<< ","<<y[2]<<")\n";
     }
 
-    space_object::space_object(string name, int life, Color color, string picture, double sizeX, double sizeY, int windowSizeX, int windowSizeY, double MaxSpeed , double x[], double y[], double phy){
+    space_object::space_object(string name, double gravity, int life, Color color, string picture, double sizeX, double sizeY, int windowSizeX, int windowSizeY, double MaxSpeed , double x[], double y[], double phy){
 
         this-> name = name;
         this-> life = life;
+        this-> gravity = gravity;
         this-> sizeX = sizeX;
         this-> sizeY = sizeY;
         this-> windowSizeX = windowSizeX;
@@ -315,19 +318,19 @@ class Shot: public space_object {
             
             cout << "distance de la planete: " << distance(a);
 
-            x[2] = 1e2 * (a.x[0]-x[0])*pow(distance(a),-1);
-            y[2] = 1e2 * (a.y[0]-y[0])*pow(distance(a),-1);
+            x[2] += a.gravity * (a.x[0]-x[0])*pow(distance(a),-1);
+            y[2] += a.gravity * (a.y[0]-y[0])*pow(distance(a),-1);
 
             
         }
 
         // Remove a bullet if its TTL has expired
-        bool Remove(){
+        bool LivingTime(){
             return (GetTickCount() - createdTime >= ttl);
         }
 
         //Shot Consructor
-        Shot(string name, int ShapePoints, Color color, string picture, double sizeX, double sizeY, double ttl, int windowSizeX, int windowSizeY, double MaxSpeed , double x[], double y[],double phy):space_object(name, ShapePoints, color, picture, sizeX, sizeY, windowSizeX, windowSizeY, MaxSpeed , x, y,phy){
+        Shot(string name, double gravity, int life, Color color, string picture, double sizeX, double sizeY, double ttl, int windowSizeX, int windowSizeY, double MaxSpeed , double x[], double y[],double phy):space_object(name, gravity, life, color, picture, sizeX, sizeY, windowSizeX, windowSizeY, MaxSpeed , x, y,phy){
             this-> ttl = ttl;
             this-> createdTime = GetTickCount();
             this-> ObjectsInSpace.push_back(*this);
@@ -371,7 +374,6 @@ class ship: public space_object{
 	
         //Vectors of shots fired (Misils or Bullets?) And ships
         vector<Shot> ShotsInSpace;
-        vector<ship> ShipsInSpace;
         
         void GetAll(){
 
@@ -400,13 +402,12 @@ class ship: public space_object{
 	    void ResetShotCooldown();
 
         //Add control over the ship
-        void GetInput(int sensibility);
+        virtual void GetInput(int sensibility);
 
-        ship(string name, int ShapePoints, Color color, string picture, double sizeX,double sizeY, int maxShots, int windowSizeX, int windowSizeY, double MaxSpeed, double x[], double y[], double phy);
+        ship(string name, double gravity, int life, Color color, string picture, double sizeX,double sizeY, int maxShots, int windowSizeX, int windowSizeY, double MaxSpeed, double x[], double y[], double phy);
         ship(int windowSizeX, int windowSizeY):space_object(windowSizeX,windowSizeY){};
         ~ship();
 };
-
 
 //Methods related to ship objects
 
@@ -420,11 +421,11 @@ class ship: public space_object{
                 if (shotsUsed < maxShots)
                 {
 
-                    double x[]={GetVectorX()[0], GetDirectionX()*100, 0};
-                    double y[]={GetVectorY()[0], GetDirectionY()*100, 0};
+                    double x[]={GetVectorX()[0], GetDirectionX()*2e2, 0};
+                    double y[]={GetVectorY()[0], GetDirectionY()*2e2, 0};
                     
                     // Makes new Shot
-                    Shot shot( "Boom... ", 30, Color::Black, "spaceMissil.png", 20, 35, 3e3, GetWindowSizeX(), GetWindowSizeY(), GetMaxSpeed(), x, y, phy + 180);
+                    Shot shot( "Boom... ", 1., 3, Color::Black, "spaceMissil.png", 20, 35, 3e3, GetWindowSizeX(), GetWindowSizeY(), 2e2, x, y, phy + 180);
                     
                     //Stores it in a vector
                     (this->ShotsInSpace).push_back(shot);
@@ -455,39 +456,61 @@ class ship: public space_object{
     void ship::GetInput(int sensibility){
 
             if ( Keyboard::isKeyPressed(sf::Keyboard::Left) )  {        this->phy   += -sensibility;
-                if ( Keyboard::isKeyPressed(sf::Keyboard::Up) )         this->trust += sensibility;
-                else if ( Keyboard::isKeyPressed(sf::Keyboard::Down) )  this->trust += -sensibility;    
+                if ( Keyboard::isKeyPressed(sf::Keyboard::Up) ){        this->trust += sensibility;
+                    if ( Keyboard::isKeyPressed(sf::Keyboard::Space) ) firing = true;
+                    else firing = false;
+                }
+                else if ( Keyboard::isKeyPressed(sf::Keyboard::Down) ){ this->trust += -sensibility;
+                    if ( Keyboard::isKeyPressed(sf::Keyboard::Space) ) firing = true;
+                    else firing = false;
+                }
+                else if ( Keyboard::isKeyPressed(sf::Keyboard::Space) ) firing = true;
+                else firing = false;
             }
 
             else if ( Keyboard::isKeyPressed(sf::Keyboard::Right) ) {   this->phy   += +sensibility;
-                if ( Keyboard::isKeyPressed(sf::Keyboard::Up) )         this->trust += sensibility;
-                else if ( Keyboard::isKeyPressed(sf::Keyboard::Down) )  this->trust += -sensibility;
+                if ( Keyboard::isKeyPressed(sf::Keyboard::Up) ){         this->trust += sensibility;
+                    if ( Keyboard::isKeyPressed(sf::Keyboard::Space) ) firing = true;
+                    else firing = false;
+                }
+                else if ( Keyboard::isKeyPressed(sf::Keyboard::Down) ){  this->trust += -sensibility;
+                    if ( Keyboard::isKeyPressed(sf::Keyboard::Space) ) firing = true;
+                    else firing = false;
+                }
+                else if ( Keyboard::isKeyPressed(sf::Keyboard::Space) ) firing = true;
+                else firing = false;
             }
-            else if ( Keyboard::isKeyPressed(sf::Keyboard::Up) )        this->trust += sensibility;
-            else if ( Keyboard::isKeyPressed(sf::Keyboard::Down) )      this->trust += -sensibility;
+            else if ( Keyboard::isKeyPressed(sf::Keyboard::Up) ){        this->trust += sensibility;
+                if ( Keyboard::isKeyPressed(sf::Keyboard::Space) ) firing = true;
+                else firing = false;
+            }
+            else if ( Keyboard::isKeyPressed(sf::Keyboard::Down) ){      this->trust += -sensibility;
+                if ( Keyboard::isKeyPressed(sf::Keyboard::Space) ) firing = true;
+                else firing = false;
+            }
 
             else if ( Keyboard::isKeyPressed(sf::Keyboard::Space) ) firing = true;
             else {
-            
 
                 trust = 0.;
                 this->GetVectorX()[2] = 0.;
                 this->GetVectorY()[2] = 0.;
                 ResetShotCooldown();
                 firing = false;
+            
             }
 
             GetVectorX()[2] = trust*GetDirectionX();
             GetVectorY()[2] = trust*GetDirectionY();
 
         }
-    ship::ship(string name, int ShapePoints, Color color, string picture, double sizeX, double sizeY, int maxShots, int windowSizeX, int windowSizeY, double MaxSpeed , double x[], double y[],double phy):space_object(name, ShapePoints, color, picture, sizeX, sizeY, windowSizeX, windowSizeY, MaxSpeed , x, y, phy){
+
+    ship::ship(string name, double gravity, int life, Color color, string picture, double sizeX, double sizeY, int maxShots, int windowSizeX, int windowSizeY, double MaxSpeed , double x[], double y[],double phy):space_object(name, gravity, life, color, picture, sizeX, sizeY, windowSizeX, windowSizeY, MaxSpeed , x, y, phy){
         this->maxShots = maxShots;
         this->shotsUsed = 0;
         this->lastShotTime = GetTickCount();
         this->firing = false;
-        this->shotCooldown = 1000;
-        this->ShipsInSpace.push_back(*this);
+        this->shotCooldown = 500; // Time between each shot if fired continously (in ms)
     }
     ship::~ship(){}
 
@@ -510,13 +533,13 @@ class planet: public space_object{
 
             }
 
-        double positionA(double sup){
+        double RandPosition(double sup){
 
             return rand()%(int)abs(sup)-0.5*sup;
 
         }
 
-        planet(string name, int ShapePoints, Color color, string picture, double sizeX, double sizeY, int windowSizeX, int windowSizeY, double MaxSpeed, double x[], double y[], double phy):space_object( name, ShapePoints, color, picture, sizeX, sizeY, windowSizeX, windowSizeY, MaxSpeed, x, y, phy){}
+        planet(string name, double gravity, int life, Color color, string picture, double sizeX, double sizeY, int windowSizeX, int windowSizeY, double MaxSpeed, double x[], double y[], double phy):space_object( name, gravity, life, color, picture, sizeX, sizeY, windowSizeX, windowSizeY, MaxSpeed, x, y, phy){}
 
 
 };
@@ -540,6 +563,9 @@ int main(){
         double sizeX = 100, sizeY = 94;     // dimensions of the ship
         double sizePX = 215, sizePY = 211;  // dimensions of the planet
         
+        double gravity = 1e2;
+        int life = 100;
+        
         double x[]={sizeX+100,0.,0.},y[]={sizeY+100,0.,0.}; // position initiale du veseau x[0],y[0], vitesse x[1], y[1] et acceleration x[3], x
                                                             // x[2] et y[2] Intensité des forces subies par le cercle exprimees dans la base canonique.
         int vmax = 100, maxShots = 10;
@@ -549,12 +575,18 @@ int main(){
 
     /// Objects \\\
 
+        ship p("player1", gravity, life, Color::Green, "spaceShip.png", sizeX, sizeY, maxShots, windowSizeX, windowSizeY, vmax, x, y, phy);
+    
         vector<planet> PlanetsInSpace;
-        ship p("player1", 300, Color::Green, "spaceShip.png", sizeX, sizeY, maxShots, windowSizeX, windowSizeY, vmax, x, y, phy);
-        planet mars( "Mars", 300, Color::Blue, "meteor.png", sizePX, sizePY, windowSizeX, windowSizeY, vmax, x, y, phy );
+        planet mars( "Mars", gravity, life, Color::Blue, "meteor.png", sizePX, sizePY, windowSizeX, windowSizeY, vmax, x, y, phy );
+        planet moon("Moon", gravity, life, Color::Blue, "meteor.png", sizePX, sizePY, windowSizeX, windowSizeY, vmax, x, y, phy );
         PlanetsInSpace.push_back(mars);
+        PlanetsInSpace.push_back(moon);       
         
         Text PlayerLife;
+        ostringstream dataPlayer1;
+        
+        RectangleShape boundShip;
 
     while (window.isOpen()){
 
@@ -563,20 +595,33 @@ int main(){
         while (window.pollEvent(event)){
             if (event.type == Event::Closed) window.close();
           }
-        //Closses the window
+        //Closses the window when you press (x)
 
         //Sets the background
 		window.clear(Color::Black);
         window.draw(sFond);        
-        
+
         //clears the terminal
         system("clear");    
     
-        mars.GetAll();
-        mars.UpdatePosition();
-        mars.SetForces( mars.positionA( windowSizeX), mars.positionA( windowSizeY) );
-		
-        //Get the input from the arrows in the keyboard
+        //Updates all information about planets
+
+        for (int i = 0; i < (PlanetsInSpace).size(); i++)
+        {
+            PlanetsInSpace[i].GetAll();
+            PlanetsInSpace[i].UpdatePosition();
+            PlanetsInSpace[i].SetForces(PlanetsInSpace[0].RandPosition( windowSizeX), PlanetsInSpace[0].RandPosition( windowSizeY));
+        }
+
+        boundShip.setOrigin(p.shape.getOrigin().x,p.shape.getOrigin().y);
+        boundShip.setPosition(p.shape.getPosition().x,p.shape.getPosition().y);
+        boundShip.setFillColor(Color::Transparent);
+        boundShip.setSize(sf::Vector2f(p.shape.getGlobalBounds().width,p.shape.getGlobalBounds().height));
+        boundShip.setOutlineThickness(10);
+        boundShip.setOutlineColor(Color::Magenta);
+        window.draw(boundShip);
+
+        //Get the input from the arrows in the keyboard for player1
 		p.GetInput(3);
 
         if ( p.firing ){
@@ -589,25 +634,25 @@ int main(){
        
         //Sequence that updates all of the shots in space
         for (int i = 0 ; i < (p.ShotsInSpace).size(); i++){
-
-            (p.ShotsInSpace[i]).UpdatePosition();
+            
+            (p.ShotsInSpace[i]).UpdatePosition();    
             (p.ShotsInSpace[i]).texture.loadFromFile("spaceMissil.png");
             (p.ShotsInSpace[i]).shape.setTexture((p.ShotsInSpace[i]).texture);
             (p.ShotsInSpace[i]).GetAll();
             (p.ShotsInSpace[i]).phy = 180 + (180/M_PI) * acos(((p.ShotsInSpace[i]).x[1]) * pow( sqrt( pow(((p.ShotsInSpace[i]).x[1]), 2) + pow( ((p.ShotsInSpace[i]).y[1]), 2) ) ,-1));
-          //(p.ShotsInSpace[i]).phy = 180 + (180/M_PI) * asin(((p.ShotsInSpace[i]).y[1] ) * pow( sqrt( pow(((p.ShotsInSpace[i]).x[1] ), 2) + pow( ((p.ShotsInSpace[i]).y[1] ), 2) ) ,-1));
-            (p.ShotsInSpace[i]).externalForce(mars);
-            (p.ShotsInSpace[i]).draw(window);
-            
             cout << "\n Angle par le Cosinus: "     << 180 + (180/M_PI) * acos(((p.ShotsInSpace[i]).x[1]) * pow( sqrt( pow(((p.ShotsInSpace[i]).x[1]), 2) + pow( ((p.ShotsInSpace[i]).y[1]), 2) ) ,-1)) 
                  << "\n Angle par le Sinus: "       << 180 + (180/M_PI) * asin(((p.ShotsInSpace[i]).y[1]) * pow( sqrt( pow(((p.ShotsInSpace[i]).x[1]), 2) + pow( ((p.ShotsInSpace[i]).y[1]), 2) ) ,-1));
+            (p.ShotsInSpace[i]).SetForces(0.,0.);
+            for (int l = 0 ; l < (PlanetsInSpace).size(); l++) (p.ShotsInSpace[i]).externalForce(PlanetsInSpace[l]);
+            (p.ShotsInSpace[i]).draw(window);
+            
             
             sum += p.distance((p.ShotsInSpace)[i]);
 
-            //If the shot is no longer 
-            if( ((p.ShotsInSpace).front()).Remove() ) {
+            //If the shot is no longer permited then erase
+            if( (*( (p.ShotsInSpace).begin()+i )).LivingTime() ) {
                 p.EndFire();
-                (p.ShotsInSpace).erase((p.ShotsInSpace).begin());
+                (p.ShotsInSpace).erase((p.ShotsInSpace).begin()+ i || (*((p.ShotsInSpace).begin()+i)).distance(PlanetsInSpace[i]) < sqrt( pow((PlanetsInSpace[0].sizeX), 2) + pow((PlanetsInSpace[0].sizeY), 2) ) );
             }
         }
         cout << "\nSum of bullets distace from ship: " << sum << endl; 
@@ -618,7 +663,7 @@ int main(){
 		//Check control
         p.GetAll();
 
-        window.draw(mars.shape);
+        for (int i = 0 ; i < (PlanetsInSpace).size(); i++) window.draw(PlanetsInSpace[i].shape);
         window.draw(p.shape);
         window.display();
 
