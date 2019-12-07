@@ -43,7 +43,6 @@ class space_object {
 
         Sprite shape;
         Texture texture;
-        vector<space_object> ObjectsInSpace;
 
         //Defined by partner for rotation mouvement rho and phy 
         double trust,phy; //provisonal
@@ -205,7 +204,7 @@ class space_object {
         }
 
 
-        void SetAll(string name, double sizeX, double sizeY, int windowSizeX, int windowSizeY, double MaxSpeed , double x[], double y[]);
+        void SetAll(string name, int life, double sizeX, double sizeY, int windowSizeX, int windowSizeY, double MaxSpeed , double x[], double y[]);
         
         virtual void GetAll();
 
@@ -226,9 +225,10 @@ class space_object {
 
 //Methods related to Space
 
-    void space_object::SetAll(string name, double sizeX, double sizeY, int windowSizeX, int windowSizeY, double MaxSpeed , double x[], double y[]){
+    void space_object::SetAll(string name, int life, double sizeX, double sizeY, int windowSizeX, int windowSizeY, double MaxSpeed , double x[], double y[]){
 
         this->name = name;
+        this->life = life;
         this->sizeX = sizeX;
         this->sizeY = sizeY;
         this->windowSizeX = windowSizeX;
@@ -243,8 +243,8 @@ class space_object {
 
         //Check control
         cout<< endl
-            << "Number of Space Objects:    " << ObjectsInSpace.size() << endl
             << "Name: " << name << endl
+            << "Life: " << life << endl
             <<  "WindowSizeX: " << windowSizeX << endl
             <<  "WindowSizeY: " << windowSizeY << endl
             <<  "MaxSpeed:  "    << MaxSpeed << endl
@@ -273,8 +273,6 @@ class space_object {
         this-> shape.setOrigin(sizeX/2.,sizeY/2.);
         this-> shape.setRotation(phy - 90);
         this-> shape.setTexture(texture);
-        this-> ObjectsInSpace.push_back(*this);
-
     }
 
     space_object::space_object(int windowSizeX, int windowSizeY){
@@ -333,8 +331,6 @@ class Shot: public space_object {
         Shot(string name, double gravity, int life, Color color, string picture, double sizeX, double sizeY, double ttl, int windowSizeX, int windowSizeY, double MaxSpeed , double x[], double y[],double phy):space_object(name, gravity, life, color, picture, sizeX, sizeY, windowSizeX, windowSizeY, MaxSpeed , x, y,phy){
             this-> ttl = ttl;
             this-> createdTime = GetTickCount();
-            this-> ObjectsInSpace.push_back(*this);
-            
         }
 
         // Delete a bullet
@@ -378,18 +374,17 @@ class ship: public space_object{
         void GetAll(){
 
             //Check control
-            cout<< endl
-                <<  "Number of Space Objects:    " << ObjectsInSpace.size() << endl
-                <<  "Name: " << GetName() << endl
-                <<  "WindowSizeX: " << GetWindowSizeX() << endl
-                <<  "WindowSizeY: " << GetWindowSizeY() << endl
-                <<  "MaxSpeed:  "    << GetMaxSpeed() << endl
-                <<  "Shots fired vector size:  " << (ShotsInSpace.size()) << endl
-                <<  "Time (in ms):  "<< GetTickCount() << endl
-                <<  "   Rotation:   " << phy << endl
-                <<  "   Position: ("    << GetVectorX()[0]<< ","<<GetVectorY()[0]<<")"
-                <<  "   Vitesse: ("     << GetVectorX()[1]<< ","<<GetVectorY()[1]<<")"
-                <<  "   acceleration: ("<< GetVectorX()[2]<< ","<<GetVectorY()[2]<<")\n";
+            cout << endl
+                 <<  "Name: " << GetName() << endl
+                 <<  "WindowSizeX: " << GetWindowSizeX() << endl
+                 <<  "WindowSizeY: " << GetWindowSizeY() << endl
+                 <<  "MaxSpeed:  "    << GetMaxSpeed() << endl
+                 <<  "Shots fired vector size:  " << (ShotsInSpace.size()) << endl
+                 <<  "Time (in ms):  "<< GetTickCount() << endl
+                 <<  "   Rotation:   " << phy << endl
+                 <<  "   Position: ("    << GetVectorX()[0]<< ","<<GetVectorY()[0]<<")"
+                 <<  "   Vitesse: ("     << GetVectorX()[1]<< ","<<GetVectorY()[1]<<")"
+                 <<  "   acceleration: ("<< GetVectorX()[2]<< ","<<GetVectorY()[2]<<")\n";
         }
         
         // Create a new shot and ensures that it doesn't goes like crazy
@@ -566,12 +561,10 @@ int main(){
         double gravity = 1e2;
         int life = 100;
         
-        double x[]={sizeX+100,0.,0.},y[]={sizeY+100,0.,0.}; // position initiale du veseau x[0],y[0], vitesse x[1], y[1] et acceleration x[3], x
+        double x[]={windowSizeX/4.,0.,0.},y[]={windowSizeY*0.5,0.,0.}; // position initiale du veseau x[0],y[0], vitesse x[1], y[1] et acceleration x[3], x
                                                             // x[2] et y[2] Intensité des forces subies par le cercle exprimees dans la base canonique.
         int vmax = 100, maxShots = 10;
         double phy = 0;
-
-        double sum = 0; //Test to see if it is possible to create the fonction force() using this method
 
     /// Objects \\\
 
@@ -579,6 +572,8 @@ int main(){
     
         vector<planet> PlanetsInSpace;
         planet mars( "Mars", gravity, life, Color::Blue, "meteor.png", sizePX, sizePY, windowSizeX, windowSizeY, vmax, x, y, phy );
+        x[0]=windowSizeX*3/4.;y[0]=windowSizeY*0.5;
+
         planet moon("Moon", gravity, life, Color::Blue, "meteor.png", sizePX, sizePY, windowSizeX, windowSizeY, vmax, x, y, phy );
         PlanetsInSpace.push_back(mars);
         PlanetsInSpace.push_back(moon);       
@@ -611,26 +606,27 @@ int main(){
         {
             PlanetsInSpace[i].GetAll();
             PlanetsInSpace[i].UpdatePosition();
-            PlanetsInSpace[i].SetForces(PlanetsInSpace[0].RandPosition( windowSizeX), PlanetsInSpace[0].RandPosition( windowSizeY));
+            //PlanetsInSpace[i].SetForces(PlanetsInSpace[0].RandPosition( 10 ), PlanetsInSpace[0].RandPosition( 10 ));
         }
 
-        //Planet 0
-        boundShip0.setOrigin(PlanetsInSpace[0].shape.getOrigin().x, PlanetsInSpace[0].shape.getOrigin().y);
-        boundShip0.setPosition(PlanetsInSpace[0].shape.getPosition().x, PlanetsInSpace[0].shape.getPosition().y);
-        boundShip0.setFillColor(Color::Transparent);
-        boundShip0.setSize(sf::Vector2f(PlanetsInSpace[0].shape.getGlobalBounds().width, PlanetsInSpace[0].shape.getGlobalBounds().height));
-        boundShip0.setOutlineThickness(5);
-        boundShip0.setOutlineColor(Color::Magenta);
-        window.draw(boundShip0);
-        
-        //Planet 1
-        boundShip1.setOrigin(PlanetsInSpace[1].shape.getOrigin().x, PlanetsInSpace[1].shape.getOrigin().y);
-        boundShip1.setPosition(PlanetsInSpace[1].shape.getPosition().x, PlanetsInSpace[1].shape.getPosition().y);
-        boundShip1.setFillColor(Color::Transparent);
-        boundShip1.setSize(sf::Vector2f(PlanetsInSpace[1].shape.getGlobalBounds().width, PlanetsInSpace[1].shape.getGlobalBounds().height));
-        boundShip1.setOutlineThickness(5);
-        boundShip1.setOutlineColor(Color::Magenta);
-        window.draw(boundShip1);
+        //Markers
+            //Planet 0
+            boundShip0.setOrigin(PlanetsInSpace[0].shape.getOrigin().x, PlanetsInSpace[0].shape.getOrigin().y);
+            boundShip0.setPosition(PlanetsInSpace[0].shape.getPosition().x, PlanetsInSpace[0].shape.getPosition().y);
+            boundShip0.setFillColor(Color::Transparent);
+            boundShip0.setSize(sf::Vector2f(PlanetsInSpace[0].shape.getGlobalBounds().width, PlanetsInSpace[0].shape.getGlobalBounds().height));
+            boundShip0.setOutlineThickness(5);
+            boundShip0.setOutlineColor(Color::Magenta);
+            window.draw(boundShip0);
+            
+            //Planet 1
+            boundShip1.setOrigin(PlanetsInSpace[1].shape.getOrigin().x, PlanetsInSpace[1].shape.getOrigin().y);
+            boundShip1.setPosition(PlanetsInSpace[1].shape.getPosition().x, PlanetsInSpace[1].shape.getPosition().y);
+            boundShip1.setFillColor(Color::Transparent);
+            boundShip1.setSize(sf::Vector2f(PlanetsInSpace[1].shape.getGlobalBounds().width, PlanetsInSpace[1].shape.getGlobalBounds().height));
+            boundShip1.setOutlineThickness(5);
+            boundShip1.setOutlineColor(Color::Magenta);
+            window.draw(boundShip1);
 
 
         //Get the input from the arrows in the keyboard for player1
@@ -657,7 +653,6 @@ int main(){
             (p.ShotsInSpace[i]).SetForces(0.,0.);
             
             (p.ShotsInSpace[i]).draw(window);
-            sum += p.distance((p.ShotsInSpace)[i]);
             
             for (int l = 0 ; l < (PlanetsInSpace).size(); l++) (p.ShotsInSpace[i]).externalForce(PlanetsInSpace[l]);
 
@@ -667,11 +662,7 @@ int main(){
                 (p.ShotsInSpace).erase((p.ShotsInSpace).begin()+ i);
             }
 
-
-
-
         }
-        cout << "\nSum of bullets distace from ship: " << sum << endl; 
 		
         //Update position of all the elements related to the player p
 		p.UpdatePosition();
@@ -679,7 +670,17 @@ int main(){
 		//Check control
         p.GetAll();
 
-        for (int i = 0 ; i < (PlanetsInSpace).size(); i++) window.draw(PlanetsInSpace[i].shape);
+        for (int i = 0 ; i < (PlanetsInSpace).size(); i++){
+        
+        if (PlanetsInSpace[i].life > 50)
+        {
+            window.draw(PlanetsInSpace[i].shape);
+            
+        }
+        
+
+        
+        }
         window.draw(p.shape);
         window.display();
 
