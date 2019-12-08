@@ -378,6 +378,7 @@ class ship: public space_object{
             //Check control
             cout << endl
                  <<  "Name: " << GetName() << endl
+                 <<  "Life: " << life << endl
                  <<  "WindowSizeX: " << GetWindowSizeX() << endl
                  <<  "WindowSizeY: " << GetWindowSizeY() << endl
                  <<  "MaxSpeed:  "    << GetMaxSpeed() << endl
@@ -703,6 +704,7 @@ int main(){
 
 
         //Player 1 Conditions    
+        if ( !p2.isDead() ){
             //Get the input from the arrows in the keyboard for player1
             p.GetInput(3);
             if ( p.firing ){
@@ -746,15 +748,17 @@ int main(){
                     p.EndFire();
                     (p.ShotsInSpace).erase((p.ShotsInSpace).begin()+ i);
                 }
+                else if (  ( (p.ShotsInSpace)[i].shape.getGlobalBounds().intersects( p2.shape.getGlobalBounds() ) )) p2.life -= 1;
             }
             
             //Update position of all the elements related to the player p
             p.UpdatePosition();
             
             //Check control
-            p.GetAll();
+            p.GetAll();}
 
         //Player 2 Conditions
+        if ( !p2.isDead() ){
             //Get the input from the arrows in the keyboard for player1
             p2.GetInput(3);
             if ( p2.firing ){
@@ -798,6 +802,7 @@ int main(){
                     p2.EndFire();
                     (p2.ShotsInSpace).erase((p2.ShotsInSpace).begin()+ i);
                 }
+                else if ( !p.isDead()  && ( (p2.ShotsInSpace)[i].shape.getGlobalBounds().intersects( p.shape.getGlobalBounds() ) )) p.life -= 1;
 
             }
             
@@ -806,7 +811,7 @@ int main(){
             
             //Check control
             p2.GetAll();
-
+        }
         //Display effect of the planets (Penser a rajouter une animation XD)
             for (int i = 0 ; i < (PlanetsInSpace).size(); i++ ){
                 
@@ -842,8 +847,10 @@ int main(){
                     
             }
 
-        window.draw(p2.shape);
-        window.draw(p.shape);
+        if ( !p2.isDead() ) window.draw(p2.shape);
+        else { cout << "\n" << p.GetName() << "  Wiiiinnnnnsssss!!!!";}
+        if ( !p.isDead() ) window.draw(p.shape);
+        else { cout << "\n" << p2.GetName() << "  Wiiiinnnnnsssss!!!!";}
         window.display();
 
     }
