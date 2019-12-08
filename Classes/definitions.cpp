@@ -39,7 +39,7 @@ class space_object {
                     ranges above are the derivates in time
                     */
                    
-        /// TEXTURES \\\
+        /// TEXTURES ....
 
         Sprite shape;
         Texture texture;
@@ -574,7 +574,7 @@ class planet: public space_object{
 
 int main(){
 
-    /// Menu \\\
+    /// Menu ....
 
         int windowSizeX = 1200, windowSizeY = 700;
         
@@ -586,7 +586,7 @@ int main(){
         cout << "\nInserez la taille horizontale de la fenetre de jeu: ";   cin >> windowSizeX;
         cout << "\nInserez la taille verticale de la fenetre de jeu: ";     cin >> windowSizeY;
     
-    /// PROPRIETES DU FOND \\\
+    /// PROPRIETES DU FOND ....
         
         
         RenderWindow window(VideoMode(windowSizeX, windowSizeY), "Spacecraft Movement");
@@ -596,7 +596,7 @@ int main(){
         t1.setRepeated(true);
         Sprite sFond(t1,IntRect(0,0,windowSizeX,windowSizeY));
 
-    /// PROPRIETES DES OBJETS \\\
+    /// PROPRIETES DES OBJETS ....
     
         double textX = 0,textY = 0;
         double sizeX = 100, sizeY = 94;     // dimensions of the ship
@@ -610,7 +610,7 @@ int main(){
         int vmax = 100, maxShots = 10;
         double phy = 0;
 
-    /// Objects \\\
+    /// Objects ....
 
         ship p(name1, gravity, life, Color::Green, "spaceShip_01.png", sizeX, sizeY, maxShots, windowSizeX, windowSizeY, vmax, x, y, phy);
 
