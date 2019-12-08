@@ -286,8 +286,8 @@ class Shot: public space_object {
             
             cout << "distance de la planete: " << distance(a);
 
-            x[2] += a.gravity * (a.x[0]-x[0])*pow(distance(a),-1);
-            y[2] += a.gravity * (a.y[0]-y[0])*pow(distance(a),-1);
+            x[2] += a.gravity * (a.x[0]-x[0])*pow(distance(a),-2);
+            y[2] += a.gravity * (a.y[0]-y[0])*pow(distance(a),-2);
 
             
         }
@@ -603,7 +603,7 @@ int main(){
         double sizeX = 100, sizeY = 94;     // dimensions of the ship
         double sizePX = 215, sizePY = 211;  // dimensions of the planet
         
-        double gravity = 1e2;
+        double gravity = 5e5;
         int life = 100;
         
         double x[]={windowSizeX/4.,0.,0.},y[]={windowSizeY*0.5,0.,0.}; // position initiale du veseau x[0],y[0], vitesse x[1], y[1] et acceleration x[3], x
