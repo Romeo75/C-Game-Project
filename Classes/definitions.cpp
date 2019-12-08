@@ -10,7 +10,7 @@
 using namespace std;
 using namespace sf;
 
-//Function for time reference it marks the begining of the counter
+//DEBUT DU COMPTEUR (Chronomètre qui compte en ms)
 auto started = chrono::high_resolution_clock::now();
 
 class space_object {
@@ -44,8 +44,8 @@ class space_object {
         Sprite shape;
         Texture texture;
 
-        //Defined by partner for rotation mouvement rho and phy 
-        double trust,phy; //provisonal
+        
+        double trust,phy; //phy est l'angle de rotation
 
         string GetName(){ return name;}
         void SetName(string name){ this->name = name;}
@@ -85,56 +85,26 @@ class space_object {
             /*
             This sets the limits of the space object
             */
-
-            //Deffines Spacial limits
-            if ( x[0] >= (windowSizeX-sizeX*0.5) ){
-                x[1]=-x[1];
-                x[0]=windowSizeX-sizeX*0.5;
-            }
-
-            if ( x[0] < sizeX*0.5 ) {
-                x[1]=-x[1];
-                x[0]=sizeX*0.5;
-            } 
         
-            if ( y[0] >= (windowSizeY-sizeY*0.5) ){
-                y[1]=-y[1];
-                y[0]=windowSizeY-sizeY*0.5;
-            }
-
-            if ( y[0] < sizeY*0.5 ) {
-                y[1]=-y[1];
-                y[0]=sizeY*0.5;
-            }
-
-            //Deffines Speed limits
-            if ( x[1] > abs(MaxSpeed) ){
-                x[1]=MaxSpeed;
-            }
-
-            if ( y[1] > abs(MaxSpeed) ){
-                y[1]=MaxSpeed;
-            }
+            //Deffines Spacial limits
+            if (x[0] > windowSizeX) x[0]=0; if (x[0] < 0) x[0]=windowSizeX;
+            if (y[0] > windowSizeY) y[0]=0; if (y[0] < 0) y[0]=windowSizeY;
             
-            if ( x[1] < -abs(MaxSpeed) ){
-                x[1]=-MaxSpeed;
-            }
-
-            if ( y[1] < -abs(MaxSpeed) ){
-                y[1]=-MaxSpeed;
-            }
-
+            //Deffines Speed limits
+            if ( x[1] > abs(MaxSpeed) ){x[1]=MaxSpeed;}
+            if ( y[1] > abs(MaxSpeed) ){y[1]=MaxSpeed;}
+            if ( x[1] < -abs(MaxSpeed) ){x[1]=-MaxSpeed;}
+            if ( y[1] < -abs(MaxSpeed) ){y[1]=-MaxSpeed;}
         }
-
         double * GetVectorX(){ return x;}
         double * GetVectorY(){ return y;}
 
         double GetDirectionX() { return cos( phy*0.017453f );}
         double GetDirectionY() { return sin( phy*0.017453f );}
 
-        void SetPosition(double xSpeed,double ySpeed){
-            this->x[0] = xSpeed;
-            this->y[0] = ySpeed;
+        void SetPosition(double xPos,double yPos){
+            this->x[0] = xPos;
+            this->y[0] = yPos;
         }
 
         void SetSpeed(double xSpeed,double ySpeed){
@@ -295,9 +265,7 @@ class Shot: public space_object {
 
 	private:
 
-        double ttl; // time to live of the shot
-
-        double externalForces; // ? Force to take into account in the differential system of mouvement
+        double ttl; // TEMPS DE VIE DU MISSILE
 
         double createdTime;
 
@@ -324,7 +292,7 @@ class Shot: public space_object {
             
         }
 
-        // Remove a bullet if its TTL has expired
+        // SUPRESSION DU MISSILE SI TEMPS DE VIE EXPIRE
         bool LivingTime(){
             return (GetTickCount() - createdTime >= ttl);
         }
@@ -335,7 +303,7 @@ class Shot: public space_object {
             this-> createdTime = GetTickCount();
         }
 
-        // Delete a bullet
+        // SUPPRIME LE MISSILE
         ~Shot(){}
 
 };
@@ -438,9 +406,7 @@ class ship: public space_object{
         }
 
     
-    /*
-        Stop firing a bullet (called back when a Bullet object is destroyed)
-    */
+    // Stop firing a bullet (called back when a Bullet object is destroyed)
     void ship::EndFire(){
         shotsUsed = max(shotsUsed - 1, 0);
     }
@@ -573,8 +539,8 @@ void ship2::GetInput(int sensibility){
     GetVectorX()[2] = trust*GetDirectionX();
     GetVectorY()[2] = trust*GetDirectionY();
 
-
 }
+
 //Class that defines the planets
 class planet: public space_object{
 
@@ -605,12 +571,24 @@ class planet: public space_object{
 
 };
 
+
 int main(){
 
+    /// Menu \\\
 
-    /// Properties Of the Background\\\
+        int windowSizeX = 1200, windowSizeY = 700;
         
-        int windowSizeX = 800, windowSizeY = 600;
+        string name1,name2;
+
+        cout << "\nInserez le nom du joueur N°1: ";cin >> name1;
+        cout << "\nInserez le nom du joueur N°2: ";cin >> name2;
+
+        cout << "\nInserez la taille horizontale de la fenetre de jeu: ";   cin >> windowSizeX;
+        cout << "\nInserez la taille verticale de la fenetre de jeu: ";     cin >> windowSizeY;
+    
+    /// PROPRIETES DU FOND \\\
+        
+        
         RenderWindow window(VideoMode(windowSizeX, windowSizeY), "Spacecraft Movement");
         window.setFramerateLimit(40);
         Texture t1;
@@ -618,7 +596,7 @@ int main(){
         t1.setRepeated(true);
         Sprite sFond(t1,IntRect(0,0,windowSizeX,windowSizeY));
 
-    /// Properties Of the Objects\\\
+    /// PROPRIETES DES OBJETS \\\
     
         double textX = 0,textY = 0;
         double sizeX = 100, sizeY = 94;     // dimensions of the ship
@@ -634,40 +612,48 @@ int main(){
 
     /// Objects \\\
 
-        ship p("player1", gravity, life, Color::Green, "spaceShip.png", sizeX, sizeY, maxShots, windowSizeX, windowSizeY, vmax, x, y, phy);
-        
+        ship p(name1, gravity, life, Color::Green, "spaceShip_01.png", sizeX, sizeY, maxShots, windowSizeX, windowSizeY, vmax, x, y, phy);
 
         vector<planet> PlanetsInSpace;
-
         planet mars( "Mars", gravity, life, Color::Blue, "meteor.png", sizePX, sizePY, windowSizeX, windowSizeY, vmax, x, y, phy );
         
         x[0]=windowSizeX*3/4.;y[0]=windowSizeY*0.5;
-        ship2 p2("player2", gravity, life, Color::Green, "spaceShip.png", sizeX, sizeY, maxShots, windowSizeX, windowSizeY, vmax, x, y, phy);
-
+        sizeX = 106, sizeY = 80;
+        ship2 p2(name2, gravity, life, Color::Green, "spaceShip_02.png", sizeX, sizeY, maxShots, windowSizeX, windowSizeY, vmax, x, y, phy);
         planet moon("Moon", gravity, life, Color::Blue, "meteor.png", sizePX, sizePY, windowSizeX, windowSizeY, vmax, x, y, phy );
+
         PlanetsInSpace.push_back(mars);
         PlanetsInSpace.push_back(moon);
         
         Font mainFont;
         mainFont.loadFromFile("kenvector_future.ttf");
         Font thinFont;
-        mainFont.loadFromFile("kenvector_future_thin.ttf");
+        thinFont.loadFromFile("kenvector_future_thin.ttf");
+
         Text PlayerVictory;
         PlayerVictory.setFont(mainFont);
         PlayerVictory.setCharacterSize(20);
         PlayerVictory.setColor(Color::White);
         PlayerVictory.setPosition(windowSizeX*0.5,windowSizeY*0.5);
-        ostringstream dataWinner;
+
+        Text playerData;
+        playerData.setFont(thinFont);
+        playerData.setCharacterSize(20);
+        playerData.setFillColor(Color::White);
+        playerData.setPosition(windowSizeX*(p.GetName().length()/(double)windowSizeX), 0);
         
+        Text player2Data;
+        player2Data.setFont(thinFont);
+        player2Data.setCharacterSize(20);
+        player2Data.setFillColor(Color::White);
+        player2Data.setPosition(windowSizeX*(1 - 2*(pow(p2.GetName().length(),2)/(double)windowSizeX)), 0);
+
         RectangleShape boundShip0;
         RectangleShape boundShip1;
-
-        
 
     while (window.isOpen()){
 
         Event event;
-
         while (window.pollEvent(event)){
             if (event.type == Event::Closed) window.close();
           }
@@ -684,11 +670,10 @@ int main(){
 
             for (int i = 0; i < (PlanetsInSpace).size(); i++)
             {
-                PlanetsInSpace[i].GetAll();
+                //PlanetsInSpace[i].GetAll();
                 PlanetsInSpace[i].UpdatePosition();
                 //PlanetsInSpace[i].SetForces(PlanetsInSpace[0].RandPosition( 10 ), PlanetsInSpace[0].RandPosition( 10 ));
             }
-            cout<<"\nNumber of planets in Space: " << PlanetsInSpace.size();
 
         //Trackers
             //Player 1
@@ -719,7 +704,7 @@ int main(){
                 
                 cout<< endl << p.GetName() + "  Fireeee!!!!!!!";
                 p.Fire();
-                p.ShotsInSpace[0].GetAll();
+                //p.ShotsInSpace[0].GetAll();
 
             }
         
@@ -729,7 +714,7 @@ int main(){
                 (p.ShotsInSpace[i]).UpdatePosition();    
                 (p.ShotsInSpace[i]).texture.loadFromFile("spaceMissil.png");
                 (p.ShotsInSpace[i]).shape.setTexture((p.ShotsInSpace[i]).texture);
-                (p.ShotsInSpace[i]).GetAll();
+              //(p.ShotsInSpace[i]).GetAll();
                 (p.ShotsInSpace[i]).phy = 180 + (180/M_PI) * acos(((p.ShotsInSpace[i]).x[1]) * pow( sqrt( pow(((p.ShotsInSpace[i]).x[1]), 2) + pow( ((p.ShotsInSpace[i]).y[1]), 2) ) ,-1));
                 cout<< "\nPlayer 1:"
                     << "\n Angle par le Cosinus: "     << 180 + (180/M_PI) * acos(((p.ShotsInSpace[i]).x[1]) * pow( sqrt( pow(((p.ShotsInSpace[i]).x[1]), 2) + pow( ((p.ShotsInSpace[i]).y[1]), 2) ) ,-1)) 
@@ -766,7 +751,8 @@ int main(){
             p.UpdatePosition();
             
             //Check control
-            p.GetAll();}
+            //p.GetAll();
+        }
 
         //Player 2 Conditions
         if ( !p2.isDead() ){
@@ -776,7 +762,7 @@ int main(){
                 
                 cout<< endl << p2.GetName() + " Fireeee!!!!!!!";
                 p2.Fire();
-                p2.ShotsInSpace[0].GetAll();
+                //p2.ShotsInSpace[0].GetAll();
 
             }
         
@@ -786,7 +772,7 @@ int main(){
                 (p2.ShotsInSpace[i]).UpdatePosition();    
                 (p2.ShotsInSpace[i]).texture.loadFromFile("spaceMissil.png");
                 (p2.ShotsInSpace[i]).shape.setTexture((p2.ShotsInSpace[i]).texture);
-                (p2.ShotsInSpace[i]).GetAll();
+                //(p2.ShotsInSpace[i]).GetAll();
                 (p2.ShotsInSpace[i]).phy = 180 + (180/M_PI) * acos(((p2.ShotsInSpace[i]).x[1]) * pow( sqrt( pow(((p2.ShotsInSpace[i]).x[1]), 2) + pow( ((p2.ShotsInSpace[i]).y[1]), 2) ) ,-1));
                 cout<< "\nPlayer2:" 
                     << "\n Angle par le Cosinus: "     << 180 + (180/M_PI) * acos(((p2.ShotsInSpace[i]).x[1]) * pow( sqrt( pow(((p2.ShotsInSpace[i]).x[1]), 2) + pow( ((p2.ShotsInSpace[i]).y[1]), 2) ) ,-1)) 
@@ -824,9 +810,9 @@ int main(){
             p2.UpdatePosition();
             
             //Check control
-            p2.GetAll();
+            //p2.GetAll();
         }
-        //Display effect of the planets (Penser a rajouter une animation XD)
+        //Affichage des planetes (petite animation XD)
             for (int i = 0 ; i < (PlanetsInSpace).size(); i++ ){
                 
                 if (75 < PlanetsInSpace[i].life && PlanetsInSpace[i].life <= 100)
@@ -861,17 +847,24 @@ int main(){
                     
             }
 
-        if ( !p2.isDead() ) window.draw(p2.shape);
-        else {
-            cout << "\n" << p.GetName() << "  Wiiiinnnnnsssss!!!!";
-            PlayerVictory.setString(p.GetName()+"  Wins!!!!");
-            
-        }
-        if ( !p.isDead() ) window.draw(p.shape);
-        else { 
-            cout << "\n" << p2.GetName() << "  Wiiiinnnnnsssss!!!!";
-            PlayerVictory.setString(p2.GetName()+"  Wins!!!!");
-        }
+            if ( !p2.isDead() ) window.draw(p2.shape);
+            else {
+                cout << "\n" << p.GetName() << "  Wiiiinnnnnsssss!!!!";
+                PlayerVictory.setString(p.GetName()+"  Wins!!!!");
+                
+            }
+            if ( !p.isDead() ) window.draw(p.shape);
+            else { 
+                cout << "\n" << p2.GetName() << "  Wiiiinnnnnsssss!!!!";
+                PlayerVictory.setString(p2.GetName()+"  Wins!!!!");
+            }
+        //Donees du joueur 1
+        playerData.setString(p.GetName() + "\nHP:   " + to_string(p.life));
+        //Donnees du joueur 2
+        player2Data.setString(p2.GetName() + "\nHP:   " + to_string(p2.life));
+
+        window.draw(playerData);
+        window.draw(player2Data);
         window.draw(PlayerVictory);
         window.display();
 
