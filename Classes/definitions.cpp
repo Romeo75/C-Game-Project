@@ -52,6 +52,8 @@ class space_object {
         
         double GetSizeX(){ return sizeX;}
         double GetSizeY(){ return sizeY;}
+
+        bool isDead(){ return (life <= 0); }
         
         double GetMaxSpeed(){ return MaxSpeed;}
 
@@ -509,6 +511,69 @@ class ship: public space_object{
     }
     ship::~ship(){}
 
+//Defines the player 2
+class ship2: public ship{
+    private:
+
+    public:
+
+        void GetInput(int sensibility);
+
+        ship2(string name, double gravity, int life, Color color, string picture, double sizeX,double sizeY, int maxShots, int windowSizeX, int windowSizeY, double MaxSpeed, double x[], double y[], double phy):ship( name, gravity, life, color, picture, sizeX, sizeY, maxShots, windowSizeX, windowSizeY, MaxSpeed, x, y, phy ){}
+        ~ship2(){}
+};
+
+void ship2::GetInput(int sensibility){
+
+    if ( Keyboard::isKeyPressed(sf::Keyboard::Q) )  {        this->phy   += -sensibility;
+        if ( Keyboard::isKeyPressed(sf::Keyboard::Z) ){        this->trust += sensibility;
+            if ( Keyboard::isKeyPressed(sf::Keyboard::F) ) firing = true;
+            else firing = false;
+        }
+        else if ( Keyboard::isKeyPressed(sf::Keyboard::S) ){ this->trust += -sensibility;
+            if ( Keyboard::isKeyPressed(sf::Keyboard::F) ) firing = true;
+            else firing = false;
+        }
+        else if ( Keyboard::isKeyPressed(sf::Keyboard::F) ) firing = true;
+        else firing = false;
+    }
+
+    else if ( Keyboard::isKeyPressed(sf::Keyboard::D) ) {   this->phy   += +sensibility;
+        if ( Keyboard::isKeyPressed(sf::Keyboard::Z) ){         this->trust += sensibility;
+            if ( Keyboard::isKeyPressed(sf::Keyboard::F) ) firing = true;
+            else firing = false;
+        }
+        else if ( Keyboard::isKeyPressed(sf::Keyboard::S) ){  this->trust += -sensibility;
+            if ( Keyboard::isKeyPressed(sf::Keyboard::F) ) firing = true;
+            else firing = false;
+        }
+        else if ( Keyboard::isKeyPressed(sf::Keyboard::F) ) firing = true;
+        else firing = false;
+    }
+    else if ( Keyboard::isKeyPressed(sf::Keyboard::Z) ){        this->trust += sensibility;
+        if ( Keyboard::isKeyPressed(sf::Keyboard::F) ) firing = true;
+        else firing = false;
+    }
+    else if ( Keyboard::isKeyPressed(sf::Keyboard::S) ){      this->trust += -sensibility;
+        if ( Keyboard::isKeyPressed(sf::Keyboard::F) ) firing = true;
+        else firing = false;
+    }
+
+    else if ( Keyboard::isKeyPressed(sf::Keyboard::F) ) firing = true;
+    else
+    {
+        trust = 0.;
+        this->GetVectorX()[2] = 0.;
+        this->GetVectorY()[2] = 0.;
+        ResetShotCooldown();
+        firing = false;
+    }
+
+    GetVectorX()[2] = trust*GetDirectionX();
+    GetVectorY()[2] = trust*GetDirectionY();
+
+
+}
 //Class that defines the planets
 class planet: public space_object{
 
@@ -535,7 +600,7 @@ class planet: public space_object{
         }
 
         planet(string name, double gravity, int life, Color color, string picture, double sizeX, double sizeY, int windowSizeX, int windowSizeY, double MaxSpeed, double x[], double y[], double phy):space_object( name, gravity, life, color, picture, sizeX, sizeY, windowSizeX, windowSizeY, MaxSpeed, x, y, phy){}
-
+        ~planet(){}
 
 };
 
@@ -569,20 +634,26 @@ int main(){
     /// Objects \\\
 
         ship p("player1", gravity, life, Color::Green, "spaceShip.png", sizeX, sizeY, maxShots, windowSizeX, windowSizeY, vmax, x, y, phy);
-    
+        
+
         vector<planet> PlanetsInSpace;
+
         planet mars( "Mars", gravity, life, Color::Blue, "meteor.png", sizePX, sizePY, windowSizeX, windowSizeY, vmax, x, y, phy );
+        
         x[0]=windowSizeX*3/4.;y[0]=windowSizeY*0.5;
+        ship2 p2("player2", gravity, life, Color::Green, "spaceShip.png", sizeX, sizeY, maxShots, windowSizeX, windowSizeY, vmax, x, y, phy);
 
         planet moon("Moon", gravity, life, Color::Blue, "meteor.png", sizePX, sizePY, windowSizeX, windowSizeY, vmax, x, y, phy );
         PlanetsInSpace.push_back(mars);
-        PlanetsInSpace.push_back(moon);       
+        PlanetsInSpace.push_back(moon);
         
         Text PlayerLife;
         ostringstream dataPlayer1;
         
         RectangleShape boundShip0;
         RectangleShape boundShip1;
+
+        
 
     while (window.isOpen()){
 
@@ -602,91 +673,185 @@ int main(){
     
         //Updates all information about planets
 
-        for (int i = 0; i < (PlanetsInSpace).size(); i++)
-        {
-            PlanetsInSpace[i].GetAll();
-            PlanetsInSpace[i].UpdatePosition();
-            //PlanetsInSpace[i].SetForces(PlanetsInSpace[0].RandPosition( 10 ), PlanetsInSpace[0].RandPosition( 10 ));
-        }
+            for (int i = 0; i < (PlanetsInSpace).size(); i++)
+            {
+                PlanetsInSpace[i].GetAll();
+                PlanetsInSpace[i].UpdatePosition();
+                //PlanetsInSpace[i].SetForces(PlanetsInSpace[0].RandPosition( 10 ), PlanetsInSpace[0].RandPosition( 10 ));
+            }
+            cout<<"\nNumber of planets in Space: " << PlanetsInSpace.size();
 
-        //Markers
-            //Planet 0
-            boundShip0.setOrigin(PlanetsInSpace[0].shape.getOrigin().x, PlanetsInSpace[0].shape.getOrigin().y);
-            boundShip0.setPosition(PlanetsInSpace[0].shape.getPosition().x, PlanetsInSpace[0].shape.getPosition().y);
+        //Trackers
+            //Player 1
+            boundShip0.setOrigin(               p.shape.getOrigin().x,              p.shape.getOrigin().y);
+            boundShip0.setPosition(             p.shape.getPosition().x,            p.shape.getPosition().y);
+            boundShip0.setSize(sf::Vector2f(    p.shape.getGlobalBounds().width,    p.shape.getGlobalBounds().height));
             boundShip0.setFillColor(Color::Transparent);
-            boundShip0.setSize(sf::Vector2f(PlanetsInSpace[0].shape.getGlobalBounds().width, PlanetsInSpace[0].shape.getGlobalBounds().height));
             boundShip0.setOutlineThickness(5);
             boundShip0.setOutlineColor(Color::Magenta);
             window.draw(boundShip0);
             
-            //Planet 1
-            boundShip1.setOrigin(PlanetsInSpace[1].shape.getOrigin().x, PlanetsInSpace[1].shape.getOrigin().y);
-            boundShip1.setPosition(PlanetsInSpace[1].shape.getPosition().x, PlanetsInSpace[1].shape.getPosition().y);
+            //Player 2
+            boundShip1.setOrigin(               p2.shape.getOrigin().x,             p2.shape.getOrigin().y);
+            boundShip1.setPosition(             p2.shape.getPosition().x,           p2.shape.getPosition().y);
+            boundShip1.setSize(sf::Vector2f(    p2.shape.getGlobalBounds().width,   p2.shape.getGlobalBounds().height));
             boundShip1.setFillColor(Color::Transparent);
-            boundShip1.setSize(sf::Vector2f(PlanetsInSpace[1].shape.getGlobalBounds().width, PlanetsInSpace[1].shape.getGlobalBounds().height));
             boundShip1.setOutlineThickness(5);
             boundShip1.setOutlineColor(Color::Magenta);
             window.draw(boundShip1);
 
 
-        //Get the input from the arrows in the keyboard for player1
-		p.GetInput(3);
 
-        if ( p.firing ){
-            
-            cout<< endl << p.GetName() + "Fireeee!!!!!!!";
-            p.Fire();
-            p.ShotsInSpace[0].GetAll();
+        //Player 1 Conditions    
+            //Get the input from the arrows in the keyboard for player1
+            p.GetInput(3);
+            if ( p.firing ){
+                
+                cout<< endl << p.GetName() + "  Fireeee!!!!!!!";
+                p.Fire();
+                p.ShotsInSpace[0].GetAll();
 
-         }
-       
-        //Sequence that updates all of the shots in space
-        for (int i = 0 ; i < (p.ShotsInSpace).size(); i++){
-            
-            (p.ShotsInSpace[i]).UpdatePosition();    
-            (p.ShotsInSpace[i]).texture.loadFromFile("spaceMissil.png");
-            (p.ShotsInSpace[i]).shape.setTexture((p.ShotsInSpace[i]).texture);
-            (p.ShotsInSpace[i]).GetAll();
-            (p.ShotsInSpace[i]).phy = 180 + (180/M_PI) * acos(((p.ShotsInSpace[i]).x[1]) * pow( sqrt( pow(((p.ShotsInSpace[i]).x[1]), 2) + pow( ((p.ShotsInSpace[i]).y[1]), 2) ) ,-1));
-            cout << "\n Angle par le Cosinus: "     << 180 + (180/M_PI) * acos(((p.ShotsInSpace[i]).x[1]) * pow( sqrt( pow(((p.ShotsInSpace[i]).x[1]), 2) + pow( ((p.ShotsInSpace[i]).y[1]), 2) ) ,-1)) 
-                 << "\n Angle par le Sinus: "       << 180 + (180/M_PI) * asin(((p.ShotsInSpace[i]).y[1]) * pow( sqrt( pow(((p.ShotsInSpace[i]).x[1]), 2) + pow( ((p.ShotsInSpace[i]).y[1]), 2) ) ,-1));
-            (p.ShotsInSpace[i]).SetForces(0.,0.);
-            
-            (p.ShotsInSpace[i]).draw(window);
-            
-            for (int l = 0 ; l < (PlanetsInSpace).size(); l++) (p.ShotsInSpace[i]).externalForce(PlanetsInSpace[l]);
+            }
+        
+            //Sequence that updates all of the shots in space
+            for (int i = 0 ; i < (p.ShotsInSpace).size(); i++){
+                
+                (p.ShotsInSpace[i]).UpdatePosition();    
+                (p.ShotsInSpace[i]).texture.loadFromFile("spaceMissil.png");
+                (p.ShotsInSpace[i]).shape.setTexture((p.ShotsInSpace[i]).texture);
+                (p.ShotsInSpace[i]).GetAll();
+                (p.ShotsInSpace[i]).phy = 180 + (180/M_PI) * acos(((p.ShotsInSpace[i]).x[1]) * pow( sqrt( pow(((p.ShotsInSpace[i]).x[1]), 2) + pow( ((p.ShotsInSpace[i]).y[1]), 2) ) ,-1));
+                cout<< "\nPlayer 1:"
+                    << "\n Angle par le Cosinus: "     << 180 + (180/M_PI) * acos(((p.ShotsInSpace[i]).x[1]) * pow( sqrt( pow(((p.ShotsInSpace[i]).x[1]), 2) + pow( ((p.ShotsInSpace[i]).y[1]), 2) ) ,-1)) 
+                    << "\n Angle par le Sinus: "       << 180 + (180/M_PI) * asin(((p.ShotsInSpace[i]).y[1]) * pow( sqrt( pow(((p.ShotsInSpace[i]).x[1]), 2) + pow( ((p.ShotsInSpace[i]).y[1]), 2) ) ,-1));
+                (p.ShotsInSpace[i]).SetForces(0.,0.);
+                
+                (p.ShotsInSpace[i]).draw(window);
+                
+                for (int l = 0 ; l < (PlanetsInSpace).size(); l++) if (!PlanetsInSpace[l].isDead()) (p.ShotsInSpace[i]).externalForce(PlanetsInSpace[l]);
 
-            //If the shot is no longer permited then erase
-            if( (*( (p.ShotsInSpace).begin()+i )).LivingTime() || ( (p.ShotsInSpace)[i].shape.getGlobalBounds().intersects( PlanetsInSpace[0].shape.getGlobalBounds() ) ) || ( (p.ShotsInSpace)[i].shape.getGlobalBounds().intersects( PlanetsInSpace[1].shape.getGlobalBounds() ) )) {
-                p.EndFire();
-                (p.ShotsInSpace).erase((p.ShotsInSpace).begin()+ i);
+                //If the shot is no longer permited then erase
+                if( (*( (p.ShotsInSpace).begin()+i )).LivingTime()) {
+                    p.EndFire();
+                    (p.ShotsInSpace).erase((p.ShotsInSpace).begin()+ i);
+                }
+                else if ( !PlanetsInSpace[0].isDead() && ( (p.ShotsInSpace)[i].shape.getGlobalBounds().intersects( PlanetsInSpace[0].shape.getGlobalBounds() ) )){
+                    PlanetsInSpace[0].life -= 10;
+                    p.EndFire();
+                    (p.ShotsInSpace).erase((p.ShotsInSpace).begin()+ i);
+    
+                }
+                else if ( !PlanetsInSpace[1].isDead() && ( (p.ShotsInSpace)[i].shape.getGlobalBounds().intersects( PlanetsInSpace[1].shape.getGlobalBounds() ) )){
+                    PlanetsInSpace[1].life -= 10;
+                    p.EndFire();
+                    (p.ShotsInSpace).erase((p.ShotsInSpace).begin()+ i);
+                }
+            }
+            
+            //Update position of all the elements related to the player p
+            p.UpdatePosition();
+            
+            //Check control
+            p.GetAll();
+
+        //Player 2 Conditions
+            //Get the input from the arrows in the keyboard for player1
+            p2.GetInput(3);
+            if ( p2.firing ){
+                
+                cout<< endl << p2.GetName() + " Fireeee!!!!!!!";
+                p2.Fire();
+                p2.ShotsInSpace[0].GetAll();
+
+            }
+        
+            //Sequence that updates all of the shots in space
+            for (int i = 0 ; i < (p2.ShotsInSpace).size(); i++){
+                
+                (p2.ShotsInSpace[i]).UpdatePosition();    
+                (p2.ShotsInSpace[i]).texture.loadFromFile("spaceMissil.png");
+                (p2.ShotsInSpace[i]).shape.setTexture((p2.ShotsInSpace[i]).texture);
+                (p2.ShotsInSpace[i]).GetAll();
+                (p2.ShotsInSpace[i]).phy = 180 + (180/M_PI) * acos(((p2.ShotsInSpace[i]).x[1]) * pow( sqrt( pow(((p2.ShotsInSpace[i]).x[1]), 2) + pow( ((p2.ShotsInSpace[i]).y[1]), 2) ) ,-1));
+                cout<< "\nPlayer2:" 
+                    << "\n Angle par le Cosinus: "     << 180 + (180/M_PI) * acos(((p2.ShotsInSpace[i]).x[1]) * pow( sqrt( pow(((p2.ShotsInSpace[i]).x[1]), 2) + pow( ((p2.ShotsInSpace[i]).y[1]), 2) ) ,-1)) 
+                    << "\n Angle par le Sinus: "       << 180 + (180/M_PI) * asin(((p2.ShotsInSpace[i]).y[1]) * pow( sqrt( pow(((p2.ShotsInSpace[i]).x[1]), 2) + pow( ((p2.ShotsInSpace[i]).y[1]), 2) ) ,-1));
+                (p2.ShotsInSpace[i]).SetForces(0.,0.);
+                
+                (p2.ShotsInSpace[i]).draw(window);
+                
+                for (int l = 0 ; l < (PlanetsInSpace).size(); l++) if (!PlanetsInSpace[l].isDead()) (p2.ShotsInSpace[i]).externalForce(PlanetsInSpace[l]);
+
+                //If the shot is no longer permited then erase
+                if( (*( (p2.ShotsInSpace).begin()+i )).LivingTime()) {
+                    p2.EndFire();
+                    (p2.ShotsInSpace).erase((p2.ShotsInSpace).begin()+ i);
+                }
+                else if ( !PlanetsInSpace[0].isDead() && ( (p2.ShotsInSpace)[i].shape.getGlobalBounds().intersects( PlanetsInSpace[0].shape.getGlobalBounds() ) )){
+                    PlanetsInSpace[0].life -= 10;
+                    p2.EndFire();
+                    (p2.ShotsInSpace).erase((p2.ShotsInSpace).begin()+ i);
+    
+                }
+                else if ( !PlanetsInSpace[1].isDead() && ( (p2.ShotsInSpace)[i].shape.getGlobalBounds().intersects( PlanetsInSpace[1].shape.getGlobalBounds() ) )){
+                    PlanetsInSpace[1].life -= 10;
+                    p2.EndFire();
+                    (p2.ShotsInSpace).erase((p2.ShotsInSpace).begin()+ i);
+                }
+
+            }
+            
+            //Update position of all the elements related to the player p2
+            p2.UpdatePosition();
+            
+            //Check control
+            p2.GetAll();
+
+        //Display effect of the planets (Penser a rajouter une animation XD)
+            for (int i = 0 ; i < (PlanetsInSpace).size(); i++ ){
+                
+                if (75 < PlanetsInSpace[i].life && PlanetsInSpace[i].life <= 100)
+                {
+                    PlanetsInSpace[i].texture.loadFromFile("spaceMeteors_001.png");
+                    PlanetsInSpace[i].texture.setSmooth(true);
+                    PlanetsInSpace[i].shape.setTexture(PlanetsInSpace[i].texture);
+                }
+                else if ( 50 < PlanetsInSpace[i].life && PlanetsInSpace[i].life <= 75)
+                {
+                    PlanetsInSpace[i].texture.loadFromFile("spaceMeteors_002.png");
+                    PlanetsInSpace[i].texture.setSmooth(true);
+                    PlanetsInSpace[i].shape.setTexture(PlanetsInSpace[i].texture);
+                }
+                else if (25 < PlanetsInSpace[i].life && PlanetsInSpace[i].life <= 50)
+                {
+                    PlanetsInSpace[i].texture.loadFromFile("spaceMeteors_003.png");
+                    PlanetsInSpace[i].texture.setSmooth(true);
+                    PlanetsInSpace[i].shape.setTexture(PlanetsInSpace[i].texture);
+                }
+                else if (PlanetsInSpace[i].life <= 25)
+                {
+                    PlanetsInSpace[i].texture.loadFromFile("spaceMeteors_004.png");
+                    PlanetsInSpace[i].texture.setSmooth(true);
+                    PlanetsInSpace[i].shape.setTexture(PlanetsInSpace[i].texture);
+                }
+
+                if (!PlanetsInSpace[i].isDead())
+                {
+                    window.draw(PlanetsInSpace[i].shape);
+                }
+                    
             }
 
-        }
-		
-        //Update position of all the elements related to the player p
-		p.UpdatePosition();
- 		
-		//Check control
-        p.GetAll();
-
-        for (int i = 0 ; i < (PlanetsInSpace).size(); i++){
-        
-        if (PlanetsInSpace[i].life > 50)
-        {
-            window.draw(PlanetsInSpace[i].shape);
-            
-        }
-        
-
-        
-        }
+        window.draw(p2.shape);
         window.draw(p.shape);
         window.display();
 
     }
 
     p.~ship();
+    p2.~ship2();
+    mars.~planet();
+    moon.~planet();
     return 0;
 }
 
