@@ -704,7 +704,7 @@ int main(){
 
 
         //Player 1 Conditions    
-        if ( !p2.isDead() ){
+        if ( !p.isDead() ){
             //Get the input from the arrows in the keyboard for player1
             p.GetInput(3);
             if ( p.firing ){
@@ -748,7 +748,10 @@ int main(){
                     p.EndFire();
                     (p.ShotsInSpace).erase((p.ShotsInSpace).begin()+ i);
                 }
-                else if (  ( (p.ShotsInSpace)[i].shape.getGlobalBounds().intersects( p2.shape.getGlobalBounds() ) )) p2.life -= 1;
+                else if (  ( (p.ShotsInSpace)[i].shape.getGlobalBounds().intersects( p2.shape.getGlobalBounds() ) )) {
+                    p2.life -= 10;
+                    (p.ShotsInSpace).erase((p.ShotsInSpace).begin()+ i);
+                    }
             }
             
             //Update position of all the elements related to the player p
@@ -802,7 +805,10 @@ int main(){
                     p2.EndFire();
                     (p2.ShotsInSpace).erase((p2.ShotsInSpace).begin()+ i);
                 }
-                else if ( !p.isDead()  && ( (p2.ShotsInSpace)[i].shape.getGlobalBounds().intersects( p.shape.getGlobalBounds() ) )) p.life -= 1;
+                else if ( !p.isDead()  && ( (p2.ShotsInSpace)[i].shape.getGlobalBounds().intersects( p.shape.getGlobalBounds() ) )) {
+                    p.life -= 10;
+                    (p2.ShotsInSpace).erase((p2.ShotsInSpace).begin()+ i);
+                    }
 
             }
             
@@ -855,10 +861,6 @@ int main(){
 
     }
 
-    p.~ship();
-    p2.~ship2();
-    mars.~planet();
-    moon.~planet();
     return 0;
 }
 
