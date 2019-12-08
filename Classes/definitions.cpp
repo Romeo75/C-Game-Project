@@ -45,7 +45,7 @@ class space_object {
         Texture texture;
 
         
-        double trust,phy; //phy est l'angle de rotation
+        double thrust,phy; //phy est l'angle de rotation
 
         string GetName(){ return name;}
         void SetName(string name){ this->name = name;}
@@ -420,11 +420,11 @@ class ship: public space_object{
     void ship::GetInput(int sensibility){
 
             if ( Keyboard::isKeyPressed(sf::Keyboard::Left) )  {        this->phy   += -sensibility;
-                if ( Keyboard::isKeyPressed(sf::Keyboard::Up) ){        this->trust += sensibility;
+                if ( Keyboard::isKeyPressed(sf::Keyboard::Up) ){        this->thrust += sensibility;
                     if ( Keyboard::isKeyPressed(sf::Keyboard::Space) ) firing = true;
                     else firing = false;
                 }
-                else if ( Keyboard::isKeyPressed(sf::Keyboard::Down) ){ this->trust += -sensibility;
+                else if ( Keyboard::isKeyPressed(sf::Keyboard::Down) ){ this->thrust += -sensibility;
                     if ( Keyboard::isKeyPressed(sf::Keyboard::Space) ) firing = true;
                     else firing = false;
                 }
@@ -433,22 +433,22 @@ class ship: public space_object{
             }
 
             else if ( Keyboard::isKeyPressed(sf::Keyboard::Right) ) {   this->phy   += +sensibility;
-                if ( Keyboard::isKeyPressed(sf::Keyboard::Up) ){         this->trust += sensibility;
+                if ( Keyboard::isKeyPressed(sf::Keyboard::Up) ){         this->thrust += sensibility;
                     if ( Keyboard::isKeyPressed(sf::Keyboard::Space) ) firing = true;
                     else firing = false;
                 }
-                else if ( Keyboard::isKeyPressed(sf::Keyboard::Down) ){  this->trust += -sensibility;
+                else if ( Keyboard::isKeyPressed(sf::Keyboard::Down) ){  this->thrust += -sensibility;
                     if ( Keyboard::isKeyPressed(sf::Keyboard::Space) ) firing = true;
                     else firing = false;
                 }
                 else if ( Keyboard::isKeyPressed(sf::Keyboard::Space) ) firing = true;
                 else firing = false;
             }
-            else if ( Keyboard::isKeyPressed(sf::Keyboard::Up) ){        this->trust += sensibility;
+            else if ( Keyboard::isKeyPressed(sf::Keyboard::Up) ){        this->thrust += sensibility;
                 if ( Keyboard::isKeyPressed(sf::Keyboard::Space) ) firing = true;
                 else firing = false;
             }
-            else if ( Keyboard::isKeyPressed(sf::Keyboard::Down) ){      this->trust += -sensibility;
+            else if ( Keyboard::isKeyPressed(sf::Keyboard::Down) ){      this->thrust += -sensibility;
                 if ( Keyboard::isKeyPressed(sf::Keyboard::Space) ) firing = true;
                 else firing = false;
             }
@@ -456,7 +456,7 @@ class ship: public space_object{
             else if ( Keyboard::isKeyPressed(sf::Keyboard::Space) ) firing = true;
             else {
 
-                trust = 0.;
+                thrust = 0.;
                 this->GetVectorX()[2] = 0.;
                 this->GetVectorY()[2] = 0.;
                 ResetShotCooldown();
@@ -464,8 +464,8 @@ class ship: public space_object{
             
             }
 
-            GetVectorX()[2] = trust*GetDirectionX();
-            GetVectorY()[2] = trust*GetDirectionY();
+            GetVectorX()[2] = thrust*GetDirectionX();
+            GetVectorY()[2] = thrust*GetDirectionY();
 
         }
 
@@ -493,11 +493,11 @@ class ship2: public ship{
 void ship2::GetInput(int sensibility){
 
     if ( Keyboard::isKeyPressed(sf::Keyboard::Q) )  {        this->phy   += -sensibility;
-        if ( Keyboard::isKeyPressed(sf::Keyboard::Z) ){        this->trust += sensibility;
+        if ( Keyboard::isKeyPressed(sf::Keyboard::Z) ){        this->thrust += sensibility;
             if ( Keyboard::isKeyPressed(sf::Keyboard::F) ) firing = true;
             else firing = false;
         }
-        else if ( Keyboard::isKeyPressed(sf::Keyboard::S) ){ this->trust += -sensibility;
+        else if ( Keyboard::isKeyPressed(sf::Keyboard::S) ){ this->thrust += -sensibility;
             if ( Keyboard::isKeyPressed(sf::Keyboard::F) ) firing = true;
             else firing = false;
         }
@@ -506,22 +506,22 @@ void ship2::GetInput(int sensibility){
     }
 
     else if ( Keyboard::isKeyPressed(sf::Keyboard::D) ) {   this->phy   += +sensibility;
-        if ( Keyboard::isKeyPressed(sf::Keyboard::Z) ){         this->trust += sensibility;
+        if ( Keyboard::isKeyPressed(sf::Keyboard::Z) ){         this->thrust += sensibility;
             if ( Keyboard::isKeyPressed(sf::Keyboard::F) ) firing = true;
             else firing = false;
         }
-        else if ( Keyboard::isKeyPressed(sf::Keyboard::S) ){  this->trust += -sensibility;
+        else if ( Keyboard::isKeyPressed(sf::Keyboard::S) ){  this->thrust += -sensibility;
             if ( Keyboard::isKeyPressed(sf::Keyboard::F) ) firing = true;
             else firing = false;
         }
         else if ( Keyboard::isKeyPressed(sf::Keyboard::F) ) firing = true;
         else firing = false;
     }
-    else if ( Keyboard::isKeyPressed(sf::Keyboard::Z) ){        this->trust += sensibility;
+    else if ( Keyboard::isKeyPressed(sf::Keyboard::Z) ){        this->thrust += sensibility;
         if ( Keyboard::isKeyPressed(sf::Keyboard::F) ) firing = true;
         else firing = false;
     }
-    else if ( Keyboard::isKeyPressed(sf::Keyboard::S) ){      this->trust += -sensibility;
+    else if ( Keyboard::isKeyPressed(sf::Keyboard::S) ){      this->thrust += -sensibility;
         if ( Keyboard::isKeyPressed(sf::Keyboard::F) ) firing = true;
         else firing = false;
     }
@@ -529,15 +529,15 @@ void ship2::GetInput(int sensibility){
     else if ( Keyboard::isKeyPressed(sf::Keyboard::F) ) firing = true;
     else
     {
-        trust = 0.;
+        thrust = 0.;
         this->GetVectorX()[2] = 0.;
         this->GetVectorY()[2] = 0.;
         ResetShotCooldown();
         firing = false;
     }
 
-    GetVectorX()[2] = trust*GetDirectionX();
-    GetVectorY()[2] = trust*GetDirectionY();
+    GetVectorX()[2] = thrust*GetDirectionX();
+    GetVectorY()[2] = thrust*GetDirectionY();
 
 }
 
