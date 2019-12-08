@@ -648,8 +648,16 @@ int main(){
         PlanetsInSpace.push_back(mars);
         PlanetsInSpace.push_back(moon);
         
-        Text PlayerLife;
-        ostringstream dataPlayer1;
+        Font mainFont;
+        mainFont.loadFromFile("kenvector_future.ttf");
+        Font thinFont;
+        mainFont.loadFromFile("kenvector_future_thin.ttf");
+        Text PlayerVictory;
+        PlayerVictory.setFont(mainFont);
+        PlayerVictory.setCharacterSize(20);
+        PlayerVictory.setColor(Color::White);
+        PlayerVictory.setPosition(windowSizeX*0.5,windowSizeY*0.5);
+        ostringstream dataWinner;
         
         RectangleShape boundShip0;
         RectangleShape boundShip1;
@@ -854,9 +862,17 @@ int main(){
             }
 
         if ( !p2.isDead() ) window.draw(p2.shape);
-        else { cout << "\n" << p.GetName() << "  Wiiiinnnnnsssss!!!!";}
+        else {
+            cout << "\n" << p.GetName() << "  Wiiiinnnnnsssss!!!!";
+            PlayerVictory.setString(p.GetName()+"  Wins!!!!");
+            
+        }
         if ( !p.isDead() ) window.draw(p.shape);
-        else { cout << "\n" << p2.GetName() << "  Wiiiinnnnnsssss!!!!";}
+        else { 
+            cout << "\n" << p2.GetName() << "  Wiiiinnnnnsssss!!!!";
+            PlayerVictory.setString(p2.GetName()+"  Wins!!!!");
+        }
+        window.draw(PlayerVictory);
         window.display();
 
     }
