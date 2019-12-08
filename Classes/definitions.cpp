@@ -576,6 +576,7 @@ int main(){
 
     /// Menu ....
 
+        system("clear");
         int windowSizeX = 1200, windowSizeY = 700;
         
         string name1,name2;
@@ -633,7 +634,7 @@ int main(){
         Text PlayerVictory;
         PlayerVictory.setFont(mainFont);
         PlayerVictory.setCharacterSize(20);
-        PlayerVictory.setColor(Color::White);
+        PlayerVictory.setColor( Color::White );
         PlayerVictory.setPosition(windowSizeX*0.5,windowSizeY*0.5);
 
         Text playerData;
@@ -646,7 +647,7 @@ int main(){
         player2Data.setFont(thinFont);
         player2Data.setCharacterSize(20);
         player2Data.setFillColor(Color::White);
-        player2Data.setPosition(windowSizeX*(1 - 2*(pow(p2.GetName().length(),2)/(double)windowSizeX)), 0);
+        player2Data.setPosition(windowSizeX*(1 - 5*(pow(p2.GetName().length(),2)/(double)windowSizeX)), 0);
 
         RectangleShape boundShip0;
         RectangleShape boundShip1;
@@ -674,7 +675,7 @@ int main(){
                 PlanetsInSpace[i].UpdatePosition();
                 //PlanetsInSpace[i].SetForces(PlanetsInSpace[0].RandPosition( 10 ), PlanetsInSpace[0].RandPosition( 10 ));
             }
-
+        /* 
         //Trackers
             //Player 1
             boundShip0.setOrigin(               p.shape.getOrigin().x,              p.shape.getOrigin().y);
@@ -693,7 +694,7 @@ int main(){
             boundShip1.setOutlineThickness(5);
             boundShip1.setOutlineColor(Color::Magenta);
             window.draw(boundShip1);
-
+        */
 
 
         //Player 1 Conditions    
