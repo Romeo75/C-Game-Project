@@ -273,7 +273,7 @@ class Shot: public space_object {
 
         void UpdatePosition(){
             
-            cout<< "\n........................BigLol........................"<<endl;
+            cout<< "\n................................................"<<endl;
             rk4(3, 0., x, 1e-1);
             rk4(3, 0., y, 1e-1);
             ApplyLimits();
@@ -551,7 +551,7 @@ class planet: public space_object{
         
         void UpdatePosition(){
                 
-                cout<<"\nLOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOL";
+                cout<<"\n......";
                 rk4(3, 0., x, 1e-1);
                 rk4(3, 0., y, 1e-1);
                 ApplyLimits();
