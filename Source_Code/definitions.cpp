@@ -391,7 +391,7 @@ class ship: public space_object{
                     double y[]={GetVectorY()[0], GetDirectionY()*5e2, 0};
                     
                     // Makes new Shot
-                    Shot shot( "Boom... ", 1., 3, Color::Black, "spaceMissil.png", 20, 35, 3e3, GetWindowSizeX(), GetWindowSizeY(), 2e2, x, y, phy + 180);
+                    Shot shot( "Boom... ", 1., 3, Color::Black, "res/spaceMissil.png", 20, 35, 3e3, GetWindowSizeX(), GetWindowSizeY(), 2e2, x, y, phy + 180);
                     
                     //Stores it in a vector
                     (this->ShotsInSpace).push_back(shot);
@@ -492,8 +492,8 @@ class ship2: public ship{
 
 void ship2::GetInput(int sensibility){
 
-    if ( Keyboard::isKeyPressed(sf::Keyboard::Q) )  {        this->phy   += -sensibility;
-        if ( Keyboard::isKeyPressed(sf::Keyboard::Z) ){        this->thrust += sensibility;
+    if ( Keyboard::isKeyPressed(sf::Keyboard::A) )  {        this->phy   += -sensibility;
+        if ( Keyboard::isKeyPressed(sf::Keyboard::W) ){        this->thrust += sensibility;
             if ( Keyboard::isKeyPressed(sf::Keyboard::F) ) firing = true;
             else firing = false;
         }
@@ -506,7 +506,7 @@ void ship2::GetInput(int sensibility){
     }
 
     else if ( Keyboard::isKeyPressed(sf::Keyboard::D) ) {   this->phy   += +sensibility;
-        if ( Keyboard::isKeyPressed(sf::Keyboard::Z) ){         this->thrust += sensibility;
+        if ( Keyboard::isKeyPressed(sf::Keyboard::W) ){         this->thrust += sensibility;
             if ( Keyboard::isKeyPressed(sf::Keyboard::F) ) firing = true;
             else firing = false;
         }
@@ -517,7 +517,7 @@ void ship2::GetInput(int sensibility){
         else if ( Keyboard::isKeyPressed(sf::Keyboard::F) ) firing = true;
         else firing = false;
     }
-    else if ( Keyboard::isKeyPressed(sf::Keyboard::Z) ){        this->thrust += sensibility;
+    else if ( Keyboard::isKeyPressed(sf::Keyboard::W) ){        this->thrust += sensibility;
         if ( Keyboard::isKeyPressed(sf::Keyboard::F) ) firing = true;
         else firing = false;
     }
