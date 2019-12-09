@@ -1,0 +1,3198 @@
+%!PS-Adobe-3.0
+%%Title: definitions.cpp
+%%For: Romeo
+%%Creator: a2ps version 4.14
+%%CreationDate: Mon Dec  9 03:27:30 2019
+%%BoundingBox: 24 24 588 768
+%%DocumentData: Clean7Bit
+%%Orientation: Landscape
+%%Pages: 8
+%%PageOrder: Ascend
+%%DocumentMedia: Letter 612 792 0 () ()
+%%DocumentNeededResources: font Courier
+%%+ font Courier-Bold
+%%+ font Courier-BoldOblique
+%%+ font Courier-Oblique
+%%+ font Helvetica
+%%+ font Helvetica-Bold
+%%+ font Symbol
+%%+ font Times-Bold
+%%+ font Times-Roman
+%%DocumentProcessColors: Black 
+%%DocumentSuppliedResources: procset a2ps-a2ps-hdr
+%%+ procset a2ps-black+white-Prolog
+%%+ encoding ISO-8859-1Encoding
+%%EndComments
+/a2psdict 200 dict def
+a2psdict begin
+%%BeginProlog
+%%Copyright: (c) 1988, 89, 90, 91, 92, 93 Miguel Santana
+%%Copyright: (c) 1995, 96, 97, 98 Akim Demaille, Miguel Santana
+% Check PostScript language level.
+/languagelevel where {
+  pop /gs_languagelevel languagelevel def
+} {
+  /gs_languagelevel 1 def
+} ifelse
+
+% EPSF import as in the Red Book
+/BeginInclude {
+  /b4_Inc_state save def    		% Save state for cleanup
+  /dict_count countdictstack def	% Count objects on dict stack
+  /op_count count 1 sub def		% Count objects on operand stack 
+  userdict begin
+    0 setgray 0 setlinecap
+    1 setlinewidth 0 setlinejoin
+    10 setmiterlimit [ ] 0 setdash newpath
+    gs_languagelevel 1 ne {
+      false setstrokeadjust false setoverprint 
+    } if
+} bind def
+
+/EndInclude {
+  count op_count sub { pos } repeat	% Clean up stacks
+  countdictstack dict_count sub { end } repeat
+  b4_Inc_state restore
+} bind def
+
+/BeginEPSF {
+  BeginInclude
+  /showpage { } def
+} bind def
+
+/EndEPSF {
+  EndInclude
+} bind def
+
+% Page prefeed
+/page_prefeed {         % bool -> -
+  statusdict /prefeed known {
+    statusdict exch /prefeed exch put
+  } {
+    pop
+  } ifelse
+} bind def
+
+/deffont {
+  findfont exch scalefont def
+} bind def
+
+/reencode_font {
+  findfont reencode 2 copy definefont pop def
+} bind def
+
+% Function c-show (str => -)
+% centers text only according to x axis.
+/c-show { 
+  dup stringwidth pop
+  2 div neg 0 rmoveto
+  show
+} bind def
+
+% Function l-show (str => -)
+% prints texts so that it ends at currentpoint
+/l-show {
+  dup stringwidth pop neg 
+  0 
+  rmoveto show
+} bind def
+
+% center-fit show (str w => -)
+% show centered, and scale currentfont so that the width is less than w
+/cfshow {
+  exch dup stringwidth pop
+  % If the title is too big, try to make it smaller
+  3 2 roll 2 copy
+  gt
+  { % if, i.e. too big
+    exch div
+    currentfont exch scalefont setfont
+  } { % ifelse
+    pop pop 
+  }
+  ifelse
+  c-show			% center title
+} bind def
+
+% Return the y size of the current font
+% - => fontsize
+/currentfontsize {
+  currentfont /FontType get 0 eq {
+    currentfont /FontMatrix get 3 get
+  }{
+    currentfont /FontMatrix get 3 get 1000 mul
+  } ifelse
+} bind def
+
+% reencode the font
+% <encoding-vector> <fontdict> -> <newfontdict>
+/reencode { %def
+  dup length 5 add dict begin
+    { %forall
+      % <vector> <key> <val>
+      1 index /FID ne 
+      { def }{ pop pop } ifelse
+    } forall
+    /Encoding exch def % -
+
+    % Use the font's bounding box to determine the ascent, descent,
+    % and overall height; don't forget that these values have to be
+    % transformed using the font's matrix.
+    % We use `load' because sometimes BBox is executable, sometimes not.
+    % Since we need 4 numbers an not an array avoid BBox from being executed
+    /FontBBox load aload pop
+    FontMatrix transform /Ascent exch def pop
+    FontMatrix transform /Descent exch def pop
+    /FontHeight Ascent Descent sub def
+
+    % Get the underline position and thickness if they're defined.
+    % Use 1 if they are not defined.
+    currentdict /FontInfo 2 copy known
+    { get
+      /UnderlinePosition 2 copy % <FontInfo> /UP <FontInfo> /UP
+      2 copy known
+      { get }{ pop pop 1 } ifelse
+      0 exch FontMatrix transform exch pop
+      def % <FontInfo>
+
+      /UnderlineThickness 2 copy % <FontInfo> /UT <FontInfo> /UT
+      2 copy known
+      { get }{ pop pop 1 } ifelse
+      0 exch FontMatrix transform exch pop
+      def % <FontInfo>
+      pop % -
+    }{ pop pop
+    } ifelse
+
+    currentdict
+  end 
+} bind def
+
+% composite fonts for ASCII-EUC mixed strings
+% Version 1.2 1/31/1990
+% Original Ken'ichi HANDA (handa@etl.go.jp)
+% Modified Norio Katayama (katayama@rd.nacsis.ac.jp),1998
+% Extend & Fix Koji Nakamaru (maru@on.cs.keio.ac.jp), 1999
+% Anyone can freely copy, modify, distribute this program.
+
+/copyfont {	% font-dic extra-entry-count  copyfont  font-dic
+	1 index maxlength add dict begin
+	{	1 index /FID ne 2 index /UniqueID ne and
+		{def} {pop pop} ifelse
+	} forall
+	currentdict
+	end
+} bind def
+
+/compositefont { % ASCIIFontName EUCFontName RomanScale RomanOffset Rot(T/F) compositefont font
+    /RomanRotation exch def
+    /RomanOffset exch def
+    /RomanScale exch def
+    userdict /fixeucfont_dict known not {
+	userdict begin
+	    /fixeucfont_dict 2 dict begin
+		/UpperByteEncoding [
+		    16#00 1 16#20 { pop 0 } for
+		    16#21 1 16#28 { 16#20 sub } for
+		    16#29 1 16#2F { pop 0 } for
+		    16#30 1 16#74 { 16#27 sub } for
+		    16#75 1 16#FF { pop 0 } for
+		] def
+	        /LowerByteEncoding [
+		    16#00 1 16#A0 { pop /.notdef } for
+		    16#A1 1 16#FE { 16#80 sub 16 2 string cvrs
+				    (cXX) dup 1 4 -1 roll
+				    putinterval cvn } for
+		    /.notdef
+		] def
+		currentdict
+	    end def
+	end
+    } if
+    findfont dup /FontType get 0 eq {
+	14 dict begin
+	    %
+	    % 7+8 bit EUC font
+	    %
+	    12 dict begin
+		/EUCFont exch def
+		/FontInfo (7+8 bit EUC font) readonly def
+		/PaintType 0 def
+		/FontType 0 def
+		/FontMatrix matrix def
+		% /FontName
+		/Encoding fixeucfont_dict /UpperByteEncoding get def
+		/FMapType 2 def
+		EUCFont /WMode known
+		{ EUCFont /WMode get /WMode exch def }
+		{ /WMode 0 def } ifelse
+		/FDepVector [
+		    EUCFont /FDepVector get 0 get
+		    [ 16#21 1 16#28 {} for 16#30 1 16#74 {} for ]
+		    {
+			13 dict begin
+			    /EUCFont EUCFont def
+			    /UpperByte exch 16#80 add def	
+			    % /FontName
+			    /FontInfo (EUC lower byte font) readonly def
+			    /PaintType 0 def
+			    /FontType 3 def
+			    /FontMatrix matrix def
+			    /FontBBox {0 0 0 0} def
+			    /Encoding
+				fixeucfont_dict /LowerByteEncoding get def
+			    % /UniqueID
+			    % /WMode
+			    /BuildChar {
+				gsave
+				exch dup /EUCFont get setfont
+				/UpperByte get
+				2 string
+				dup 0 4 -1 roll put
+				dup 1 4 -1 roll put
+				dup stringwidth setcharwidth
+				0 0 moveto show
+				grestore
+			    } bind def
+			    currentdict
+			end
+			/lowerbytefont exch definefont
+		    } forall
+		] def
+		currentdict
+	    end
+	    /eucfont exch definefont
+	    exch
+	    findfont 1 copyfont dup begin
+		RomanRotation {
+			/FontMatrix FontMatrix
+			[ 0 RomanScale neg RomanScale 0 RomanOffset neg 0 ]
+			matrix concatmatrix def
+		}{
+			/FontMatrix FontMatrix
+			[ RomanScale 0 0 RomanScale 0 RomanOffset ] matrix concatmatrix
+			def
+			/CDevProc
+			    {pop pop pop pop 0 exch -1000 exch 2 div 880} def
+		} ifelse
+	    end
+	    /asciifont exch definefont
+	    exch
+	    /FDepVector [ 4 2 roll ] def
+	    /FontType 0 def
+	    /WMode 0 def
+	    /FMapType 4 def
+	    /FontMatrix matrix def
+	    /Encoding [0 1] def
+	    /FontBBox {0 0 0 0} def
+%	    /FontHeight 1.0 def % XXXX
+	    /FontHeight RomanScale 1.0 ge { RomanScale }{ 1.0 } ifelse def
+	    /Descent -0.3 def   % XXXX
+	    currentdict
+	end
+	/tmpfont exch definefont
+	pop
+	/tmpfont findfont
+    }{
+	pop findfont 0 copyfont
+    } ifelse
+} def	
+
+/slantfont {	% FontName slant-degree  slantfont  font'
+    exch findfont 1 copyfont begin
+    [ 1 0 4 -1 roll 1 0 0 ] FontMatrix exch matrix concatmatrix
+    /FontMatrix exch def
+    currentdict
+    end
+} def
+
+% Function print line number (<string> # -)
+/# {
+  gsave
+    sx cw mul neg 2 div 0 rmoveto
+    f# setfont
+    c-show
+  grestore
+} bind def
+
+% -------- Some routines to enlight plain b/w printings ---------
+
+% Underline
+% width --
+/dounderline {
+  currentpoint
+  gsave
+    moveto
+    0 currentfont /Descent get currentfontsize mul rmoveto
+    0 rlineto
+    stroke
+  grestore
+} bind def
+
+% Underline a string
+% string --
+/dounderlinestring {
+  stringwidth pop
+  dounderline
+} bind def
+
+/UL {
+  /ul exch store
+} bind def
+
+% Draw a box of WIDTH wrt current font
+% width --
+/dobox {
+  currentpoint
+  gsave
+    newpath
+    moveto
+    0 currentfont /Descent get currentfontsize mul rmoveto
+    dup 0 rlineto
+    0 currentfont /FontHeight get currentfontsize mul rlineto
+    neg 0 rlineto
+    closepath
+    stroke
+  grestore
+} bind def
+
+/BX {
+  /bx exch store
+} bind def
+
+% Box a string
+% string --
+/doboxstring {
+  stringwidth pop
+  dobox
+} bind def
+
+%
+% ------------- Color routines ---------------
+%
+/FG /setrgbcolor load def
+
+% Draw the background
+% width --
+/dobackground {
+  currentpoint
+  gsave
+    newpath
+    moveto
+    0 currentfont /Descent get currentfontsize mul rmoveto
+    dup 0 rlineto
+    0 currentfont /FontHeight get currentfontsize mul rlineto
+    neg 0 rlineto
+    closepath
+    bgcolor aload pop setrgbcolor
+    fill
+  grestore
+} bind def
+
+% Draw bg for a string
+% string --
+/dobackgroundstring {
+  stringwidth pop
+  dobackground
+} bind def
+
+
+/BG {
+  dup /bg exch store
+  { mark 4 1 roll ] /bgcolor exch store } if
+} bind def
+
+
+/Show {
+  bg { dup dobackgroundstring } if
+  ul { dup dounderlinestring } if
+  bx { dup doboxstring } if
+  show
+} bind def
+
+% Function T(ab), jumps to the n-th tabulation in the current line
+/T {
+  cw mul x0 add
+  bg { dup currentpoint pop sub dobackground } if
+  ul { dup currentpoint pop sub dounderline } if
+  bx { dup currentpoint pop sub dobox } if
+  y0 moveto
+} bind def
+
+% Function n: move to the next line
+/n {
+  /y0 y0 bfs sub store
+  x0 y0 moveto
+} bind def
+
+% Function N: show and move to the next line
+/N {
+  Show
+  /y0 y0 bfs sub store
+  x0 y0 moveto
+} bind def
+
+/S {
+  Show
+} bind def
+
+%%BeginResource: procset a2ps-a2ps-hdr 2.0 2
+%%Copyright: (c) 1988, 89, 90, 91, 92, 93 Miguel Santana
+%%Copyright: (c) 1995, 96, 97, 98 Akim Demaille, Miguel Santana
+% Function title: prints page header.
+% <ct> <rt> <lt> are passed as argument
+/title { 
+  % 1. Draw the background
+  x v get y v get moveto
+  gsave
+    0 th 2 div neg rmoveto 
+    th setlinewidth
+    0.95 setgray
+    pw 0 rlineto stroke
+  grestore
+  % 2. Border it
+  gsave
+    0.7 setlinewidth
+    pw 0 rlineto
+    0 th neg rlineto
+    pw neg 0 rlineto
+    closepath stroke
+  grestore
+  % stk: ct rt lt
+  x v get y v get th sub 1 add moveto
+%%IncludeResource: font Helvetica
+  fHelvetica fnfs 0.8 mul scalefont setfont
+  % 3. The left title
+  gsave
+    dup stringwidth pop fnfs 0.8 mul add exch % leave space took on stack
+    fnfs 0.8 mul hm rmoveto
+    show			% left title
+  grestore
+  exch
+  % stk: ct ltw rt
+  % 4. the right title
+  gsave
+    dup stringwidth pop fnfs 0.8 mul add exch % leave space took on stack
+    dup
+    pw exch stringwidth pop fnfs 0.8 mul add sub
+    hm
+    rmoveto
+    show			% right title
+  grestore
+  % stk: ct ltw rtw
+  % 5. the center title
+  gsave
+    pw 3 1 roll
+    % stk: ct pw ltw rtw
+    3 copy 
+    % Move to the center of the left room
+    sub add 2 div hm rmoveto
+    % What is the available space in here?
+    add sub fnfs 0.8 mul sub fnfs 0.8 mul sub
+    % stk: ct space_left
+%%IncludeResource: font Helvetica-Bold
+  fHelvetica-Bold fnfs scalefont setfont
+    cfshow
+  grestore
+} bind def
+
+% Function border: prints virtual page border
+/border { %def
+  gsave				% print four sides
+    0 setgray
+    x v get y v get moveto
+    0.7 setlinewidth		% of the square
+    pw 0 rlineto
+    0 ph neg rlineto
+    pw neg 0 rlineto
+    closepath stroke
+  grestore
+} bind def
+
+% Function water: prints a water mark in background
+/water { %def
+  gsave
+    scx scy moveto rotate
+%%IncludeResource: font Times-Bold
+  fTimes-Bold 100 scalefont setfont
+    .97 setgray
+    dup stringwidth pop 2 div neg -50 rmoveto
+    show
+  grestore
+} bind def
+
+% Function rhead: prints the right header
+/rhead {  %def
+  lx ly moveto
+  fHelvetica fnfs 0.8 mul scalefont setfont
+  l-show
+} bind def
+
+% Function footer (cf rf lf -> -)
+/footer {
+  fHelvetica fnfs 0.8 mul scalefont setfont
+  dx dy moveto
+  show
+
+  snx sny moveto
+  l-show
+  
+  fnx fny moveto
+  c-show
+} bind def
+%%EndResource
+%%BeginResource: procset a2ps-black+white-Prolog 2.0 1
+
+% Function T(ab), jumps to the n-th tabulation in the current line
+/T { 
+  cw mul x0 add y0 moveto
+} bind def
+
+% Function n: move to the next line
+/n { %def
+  /y0 y0 bfs sub store
+  x0 y0 moveto
+} bind def
+
+% Function N: show and move to the next line
+/N {
+  Show
+  /y0 y0 bfs sub store
+  x0 y0 moveto
+}  bind def
+
+/S {
+  Show
+} bind def
+
+/p {
+  false UL
+  false BX
+  fCourier bfs scalefont setfont
+  Show
+} bind def
+
+/sy {
+  false UL
+  false BX
+  fSymbol bfs scalefont setfont
+  Show
+} bind def
+
+/k {
+  false UL
+  false BX
+  fCourier-Oblique bfs scalefont setfont
+  Show
+} bind def
+
+/K {
+  false UL
+  false BX
+  fCourier-Bold bfs scalefont setfont
+  Show
+} bind def
+
+/c {
+  false UL
+  false BX
+  fCourier-Oblique bfs scalefont setfont
+  Show
+} bind def
+
+/C {
+  false UL
+  false BX
+  fCourier-BoldOblique bfs scalefont setfont
+  Show 
+} bind def
+
+/l {
+  false UL
+  false BX
+  fHelvetica bfs scalefont setfont
+  Show
+} bind def
+
+/L {
+  false UL
+  false BX
+  fHelvetica-Bold bfs scalefont setfont
+  Show 
+} bind def
+
+/str{
+  false UL
+  false BX
+  fTimes-Roman bfs scalefont setfont
+  Show
+} bind def
+
+/e{
+  false UL
+  true BX
+  fHelvetica-Bold bfs scalefont setfont
+  Show
+} bind def
+
+%%EndResource
+%%EndProlog
+%%BeginSetup
+%%IncludeResource: font Courier
+%%IncludeResource: font Courier-Oblique
+%%IncludeResource: font Courier-Bold
+%%IncludeResource: font Times-Roman
+%%IncludeResource: font Symbol
+%%IncludeResource: font Courier-BoldOblique
+%%BeginResource: encoding ISO-8859-1Encoding
+/ISO-8859-1Encoding [
+/.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef 
+/.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef 
+/.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef 
+/.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef 
+/space /exclam /quotedbl /numbersign /dollar /percent /ampersand /quoteright 
+/parenleft /parenright /asterisk /plus /comma /minus /period /slash 
+/zero /one /two /three /four /five /six /seven 
+/eight /nine /colon /semicolon /less /equal /greater /question 
+/at /A /B /C /D /E /F /G 
+/H /I /J /K /L /M /N /O 
+/P /Q /R /S /T /U /V /W 
+/X /Y /Z /bracketleft /backslash /bracketright /asciicircum /underscore 
+/quoteleft /a /b /c /d /e /f /g 
+/h /i /j /k /l /m /n /o 
+/p /q /r /s /t /u /v /w 
+/x /y /z /braceleft /bar /braceright /asciitilde /.notdef 
+/.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef 
+/.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef 
+/.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef 
+/.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef 
+/space /exclamdown /cent /sterling /currency /yen /brokenbar /section 
+/dieresis /copyright /ordfeminine /guillemotleft /logicalnot /hyphen /registered /macron 
+/degree /plusminus /twosuperior /threesuperior /acute /mu /paragraph /bullet 
+/cedilla /onesuperior /ordmasculine /guillemotright /onequarter /onehalf /threequarters /questiondown 
+/Agrave /Aacute /Acircumflex /Atilde /Adieresis /Aring /AE /Ccedilla 
+/Egrave /Eacute /Ecircumflex /Edieresis /Igrave /Iacute /Icircumflex /Idieresis 
+/Eth /Ntilde /Ograve /Oacute /Ocircumflex /Otilde /Odieresis /multiply 
+/Oslash /Ugrave /Uacute /Ucircumflex /Udieresis /Yacute /Thorn /germandbls 
+/agrave /aacute /acircumflex /atilde /adieresis /aring /ae /ccedilla 
+/egrave /eacute /ecircumflex /edieresis /igrave /iacute /icircumflex /idieresis 
+/eth /ntilde /ograve /oacute /ocircumflex /otilde /odieresis /divide 
+/oslash /ugrave /uacute /ucircumflex /udieresis /yacute /thorn /ydieresis 
+] def
+%%EndResource
+% Initialize page description variables.
+/sh 612 def
+/sw 792 def
+/llx 24 def
+/urx 768 def
+/ury 588 def
+/lly 24 def
+/#copies 1 def
+/th 15.000000 def
+/fnfs 11 def
+/bfs 7.493857 def
+/cw 4.496314 def
+
+% Dictionary for ISO-8859-1 support
+/iso1dict 8 dict begin
+  /fCourier ISO-8859-1Encoding /Courier reencode_font
+  /fCourier-Bold ISO-8859-1Encoding /Courier-Bold reencode_font
+  /fCourier-BoldOblique ISO-8859-1Encoding /Courier-BoldOblique reencode_font
+  /fCourier-Oblique ISO-8859-1Encoding /Courier-Oblique reencode_font
+  /fHelvetica ISO-8859-1Encoding /Helvetica reencode_font
+  /fHelvetica-Bold ISO-8859-1Encoding /Helvetica-Bold reencode_font
+  /fTimes-Bold ISO-8859-1Encoding /Times-Bold reencode_font
+  /fTimes-Roman ISO-8859-1Encoding /Times-Roman reencode_font
+currentdict end def
+/bgcolor [ 0 0 0 ] def
+/bg false def
+/ul false def
+/bx false def
+% The font for line numbering
+/f# /Helvetica findfont bfs .6 mul scalefont def
+/fSymbol /Symbol findfont def
+/hm fnfs 0.25 mul def
+/pw
+   cw 81.400000 mul
+def
+/ph
+   522.321860 th add
+def
+/pmw urx llx sub pw 2 mul sub 1 div def
+/pmh 0 def
+/v 0 def
+/x [
+  0
+  dup pmw add pw add
+] def
+/y [
+  pmh ph add 0 mul ph add
+  dup
+] def
+/scx sw 2 div def
+/scy sh 2 div def
+/snx urx def
+/sny lly 2 add def
+/dx llx def
+/dy sny def
+/fnx scx def
+/fny dy def
+/lx snx def
+/ly ury fnfs 0.8 mul sub def
+/sx 0 def
+/tab 8 def
+/x0 0 def
+/y0 0 def
+%%EndSetup
+
+%%Page: (1-2) 1
+%%BeginPageSetup
+/pagesave save def
+sh 0 translate 90 rotate
+%%EndPageSetup
+iso1dict begin
+gsave
+llx lly 12 add translate
+/v 0 store
+/x0 x v get 3.147420 add sx cw mul add store
+/y0 y v get bfs th add sub store
+x0 y0 moveto
+(#include) K
+( <cstdlib>) p n
+(#include) K
+( <iostream>) p n
+(#include) K
+( <sstream>) p n
+(#include) K
+( <math.h>) p n
+(#include) K
+( <vector>) p n
+(#include) K
+( <chrono>) p n
+(#include) K
+( <SFML/Graphics.hpp> ) p
+(// un seul include suffit pour avoir les trois part) c n
+(ies essentielles) N
+() p 8 T () S 16 T () S 24 T () S 32 T () S 40 T () S 48 T (     ) S
+(// de la SFML: graphics, wi) c n
+(ndow et system) N
+() p n
+(using) K
+( ) p
+(namespace) K
+( std;) p n
+(using) K
+( ) p
+(namespace) K
+( sf;) p n
+() N
+(//DEBUT DU COMPTEUR \(Chronom\303\250tre qui compte en ms\)) c n
+(auto) K
+( started = chrono::high_resolution_clock::now\(\);) p n
+() N
+(class) K
+( space_object {) p n
+() N
+(    ) S
+(private) K
+(:) p n
+() N
+(    ) S 8 T (string name;) N
+() N
+(        ) S
+(virtual) K
+( ) p
+(void) k
+( dynamics\() p
+(int) k
+( n, ) p
+(double) k
+( t, ) p
+(double) k
+( y[], ) p
+(double) k
+( dy[]\){) p n
+() N
+(    ) S 8 T () S 16 T (dy[0] = y[1];) N
+(    ) S 8 T () S 16 T (dy[1] = y[2];) N
+() N
+() S 8 T () S 16 T (}) N
+() N
+(    ) S
+(public) K
+(:) p n
+() N
+(        ) S
+(double) k
+( MaxSpeed;) p n
+() S 8 T () S 16 T () S
+(double) k
+( sizeX,sizeY;) p n
+(        ) S
+(static) K
+( ) p
+(int) k
+( windowSizeX;) p n
+(        ) S
+(static) K
+( ) p
+(int) k
+( windowSizeY;) p n
+(        ) S
+(int) k
+( life;) p n
+(        ) S
+(double) k
+( gravity;) p n
+(    ) N
+(        ) S
+(double) k
+( x[3],y[3]; ) p
+(/*Canonical vectors, range 0 is the position of the ob) c n
+(ject,) N
+(                    ranges above are the derivates in time) N
+(                    */) N
+(                   ) p n
+(        ) S
+(/// TEXTURES ....) c n
+() p n
+(        Sprite shape;) N
+(        Texture texture;) N
+() N
+(        ) N
+(        ) S
+(double) k
+( trust,phy; ) p
+(//phy est l'angle de rotation) c n
+() p n
+(        string GetName\(\){ ) S
+(return) K
+( name;}) p n
+(        ) S
+(void) k
+( SetName\(string name\){ ) p
+(this) K
+(->name = name;}) p n
+(        ) N
+(        ) S
+(double) k
+( GetSizeX\(\){ ) p
+(return) K
+( sizeX;}) p n
+(        ) S
+(double) k
+( GetSizeY\(\){ ) p
+(return) K
+( sizeY;}) p n
+() N
+(        ) S
+(bool) k
+( isDead\(\){ ) p
+(return) K
+( \(life <= 0\); }) p n
+(        ) N
+(        ) S
+(double) k
+( GetMaxSpeed\(\){ ) p
+(return) K
+( MaxSpeed;}) p n
+() N
+(        ) S
+(void) k
+( SetSize\() p
+(int) k
+( sizeX,) p
+(int) k
+( sizeY\){) p n
+(            ) S
+(this) K
+(->sizeX = sizeX;) p n
+(            ) S
+(this) K
+(->sizeX = sizeX;) p n
+(        }) N
+() N
+(        ) S
+(void) k
+( draw \() p 24 T (RenderWindow &window\){ window.draw\(shape\);}) N
+() N
+(definitions.cpp) (Page 1/15) (d\303\251c. 08, 19 23:57) title
+border
+/v 1 store
+/x0 x v get 3.147420 add sx cw mul add store
+/y0 y v get bfs th add sub store
+x0 y0 moveto
+(        ) p
+(void) k
+( SetLimits\() p
+(int) k
+( windowSizeX, ) p
+(int) k
+( windowSizeY,) p
+(double) k
+( MaxSpeed\){) p n
+() N
+(            ) S
+(this) K
+(->windowSizeX = windowSizeX;) p n
+(            ) S
+(this) K
+(->windowSizeY = windowSizeY;) p n
+(            ) S
+(this) K
+(->MaxSpeed = MaxSpeed;) p n
+() N
+(        }) N
+(        ) N
+(        ) S
+(int) k
+( GetWindowSizeX\(\){ ) p
+(return) K
+( windowSizeX;}) p n
+(        ) S
+(int) k
+( GetWindowSizeY\(\){ ) p
+(return) K
+( windowSizeY;}) p n
+() N
+(        ) S
+(//Clock to get the time since execution \(it returns elapsed time in ms\)) c n
+(        ) p
+(double) k
+( GetTickCount\(\){) p n
+(            ) S
+(auto) K
+( done = chrono::high_resolution_clock::now\(\);) p n
+(            ) S
+(return) K
+( chrono::duration_cast<chrono::milliseconds>\(done-started\).cou) p n
+(nt\(\);) N
+(        }) N
+() N
+(        ) S
+(virtual) K
+( ) p
+(void) k
+( ApplyLimits\(\){) p n
+(            ) S
+(/*) c n
+(            This sets the limits of the space object) N
+(            */) N
+(        ) p n
+(            ) S
+(//Deffines Spacial limits) c n
+(            ) p
+(if) K
+( \(x[0] > windowSizeX\) x[0]=0; ) p
+(if) K
+( \(x[0] < 0\) x[0]=windowSizeX;) p n
+(            ) S
+(if) K
+( \(y[0] > windowSizeY\) y[0]=0; ) p
+(if) K
+( \(y[0] < 0\) y[0]=windowSizeY;) p n
+(            ) N
+(            ) S
+(//Deffines Speed limits) c n
+(            ) p
+(if) K
+( \( x[1] > abs\(MaxSpeed\) \){x[1]=MaxSpeed;}) p n
+(            ) S
+(if) K
+( \( y[1] > abs\(MaxSpeed\) \){y[1]=MaxSpeed;}) p n
+(            ) S
+(if) K
+( \( x[1] < -abs\(MaxSpeed\) \){x[1]=-MaxSpeed;}) p n
+(            ) S
+(if) K
+( \( y[1] < -abs\(MaxSpeed\) \){y[1]=-MaxSpeed;}) p n
+(        }) N
+(        ) S
+(double) k
+( * GetVectorX\(\){ ) p
+(return) K
+( x;}) p n
+(        ) S
+(double) k
+( * GetVectorY\(\){ ) p
+(return) K
+( y;}) p n
+() N
+(        ) S
+(double) k
+( GetDirectionX\(\) { ) p
+(return) K
+( cos\( phy*0.017453f \);}) p n
+(        ) S
+(double) k
+( GetDirectionY\(\) { ) p
+(return) K
+( sin\( phy*0.017453f \);}) p n
+() N
+(        ) S
+(void) k
+( SetPosition\() p
+(double) k
+( xPos,) p
+(double) k
+( yPos\){) p n
+(            ) S
+(this) K
+(->x[0] = xPos;) p n
+(            ) S
+(this) K
+(->y[0] = yPos;) p n
+(        }) N
+() N
+(        ) S
+(void) k
+( SetSpeed\() p
+(double) k
+( xSpeed,) p
+(double) k
+( ySpeed\){) p n
+(            ) S
+(this) K
+(->x[1] = xSpeed;) p n
+(            ) S
+(this) K
+(->y[1] = ySpeed;) p n
+(        }) N
+(        ) S
+(void) k
+( SetForces\() p
+(double) k
+( xForce,) p
+(double) k
+( yForce\){) p n
+(            ) S
+(this) K
+(->x[2] = xForce;) p n
+(            ) S
+(this) K
+(->y[2] = yForce;) p n
+(        }) N
+() N
+(        ) S
+(double) k
+( distance\(space_object& A\){) p n
+() N
+(            ) S
+(double) k
+( dx2 = pow\(\(A.GetVectorX\(\)[0]-GetVectorX\(\)[0]\), 2\);) p n
+(            ) S
+(double) k
+( dy2 = pow\(\(A.GetVectorY\(\)[0]-GetVectorY\(\)[0]\), 2\);) p n
+() N
+(            ) S
+(return) K
+( sqrt\(dx2 + dy2\);) p n
+() N
+(        }) N
+() N
+(        ) S
+(void) k
+( rk4\() p
+(int) k
+( n, ) p
+(double) k
+( x, ) p
+(double) k
+( y[], ) p
+(double) k
+( dx\){) p n
+() N
+(            ) S
+(/*-----------------------------------------) c n
+(            sous programme de resolution d'equations) N
+(            differentielles du premier ordre par) N
+(            la methode de Runge-Kutta d'ordre 4) N
+(            x = abscisse) N
+(definitions.cpp) (Page 2/15) (d\303\251c. 08, 19 23:57) title
+border
+grestore
+(Printed by Romeo) rhead
+(definitions.cpp) (1/8) (lundi d\303\251cembre 09, 2019) footer
+end % of iso1dict
+pagesave restore
+showpage
+%%Page: (3-4) 2
+%%BeginPageSetup
+/pagesave save def
+sh 0 translate 90 rotate
+%%EndPageSetup
+iso1dict begin
+gsave
+llx lly 12 add translate
+/v 0 store
+/x0 x v get 3.147420 add sx cw mul add store
+/y0 y v get bfs th add sub store
+x0 y0 moveto
+(            y = valeurs des fonctions) c n
+(            dx = pas) N
+(            n = nombre d'equations differentielles) N
+(            dynamics = variable contenant le nom du) N
+(            sous-programme qui calcule les derivees) N
+(            ----------------------------------------*/) N
+() p n
+(            ) S
+(int) k
+( i ;) p n
+(            ) S
+(double) k
+( ddx ;) p n
+(            ) S
+(/* d1, d2, d3, d4 = estimations des derivees) c n
+(            yp = estimations intermediaires des fonctions */) N
+(            ) p
+(double) k
+( d1[n], d2[n], d3[n], d4[n], yp[n];) p n
+(            ) N
+(            ddx = dx/2;                ) S
+(/* demi-pas */) c n
+(            ) p n
+(            dynamics\(n,x,y,d1\) ;          ) S
+(/* 1ere estimation */) c
+(          ) p n
+(            ) N
+(            ) S
+(for) K
+(\( i = 0; i< n; i++\){ yp[i] = y[i] + d1[i]*ddx ; }) p n
+(            dynamics\(n,x+ddx,yp,d2\) ;     ) S
+(/* 2eme estimat. \(1/2 pas\) */) c n
+(            ) p n
+(            ) S
+(for) K
+(\( i = 0; i < n; i++\){ yp[i] = y[i] + d2[i]*ddx ; }) p n
+(            dynamics\(n,x+ddx,yp,d3\) ; ) S
+(/* 3eme estimat. \(1/2 pas\) */) c n
+(            ) p n
+(            ) S
+(for) K
+(\( i = 0; i< n; i++\){ yp[i] = y[i] + d3[i]*dx ;}) p n
+(            dynamics\(n,x+dx,yp,d4\) ;      ) S
+(/* 4eme estimat. \(1 pas\) */) c n
+(            ) p
+(/* estimation de y pour le pas suivant en utilisant) c n
+(            une moyenne pond\303\251r\303\251e des d\303\251riv\303\251es en remarquant) N
+(            que : 1/6 + 1/3 + 1/3 + 1/6 = 1 */) N
+(            ) p n
+(            ) S
+(for) K
+(\( i = 0; i < n ; i++\)) p n
+(                { y[i] += dx*\( d1[i] + 2*d2[i] + 2*d3[i] + d4[i] \)/6 ; }) N
+(        }) N
+(        ) N
+(        ) S
+(virtual) K
+( ) p
+(void) k
+( UpdatePosition\(\){) p n
+(            ) N
+(            rk4\(3, 0., x, 1e-1\);) N
+(            rk4\(3, 0., y, 1e-1\);) N
+(            ApplyLimits\(\);) N
+(            shape.setPosition\(x[0],y[0]\);) N
+(            shape.setRotation\(phy - 90\);) N
+() N
+(        }) N
+() N
+() N
+(        ) S
+(void) k
+( SetAll\(string name, ) p
+(int) k
+( life, ) p
+(double) k
+( sizeX, ) p
+(double) k
+( sizeY, ) p
+(int) k
+( windo) p n
+(wSizeX, ) S
+(int) k
+( windowSizeY, ) p
+(double) k
+( MaxSpeed , ) p
+(double) k
+( x[], ) p
+(double) k
+( y[]\);) p n
+(        ) N
+(        ) S
+(virtual) K
+( ) p
+(void) k
+( GetAll\(\);) p n
+() N
+(        ) S
+(//Constructors) c n
+(        space_object\(string name, ) p
+(double) k
+( gravity, ) p
+(int) k
+( life, Color color, string ) p n
+(picture, ) S
+(double) k
+( sizeX, ) p
+(double) k
+( sizeY, ) p
+(int) k
+( windowSizeX, ) p
+(int) k
+( windowSizeY, ) p
+(double) k
+( Ma) p n
+(xSpeed, ) S
+(double) k
+( x[], ) p
+(double) k
+( y[], ) p
+(double) k
+( phy\);) p n
+(        space_object\() S
+(int) k
+( windowSizeX, ) p
+(int) k
+( windowSizeY\);) p n
+() N
+(        ) S
+(//Destructor) c n
+(        ~space_object\(\); ) p
+(// Frees up memory after objects are destroyed \(To be d) c n
+(efined - investigate\)) N
+() p n
+(};) N
+() N
+(//Instance of Static Variables) c n
+() p n
+(    ) S
+(int) k
+( space_object::windowSizeX = 800;) p n
+(    ) S
+(int) k
+( space_object::windowSizeY = 600;) p n
+() N
+() N
+(//Methods related to Space) c n
+() p n
+(definitions.cpp) (Page 3/15) (d\303\251c. 08, 19 23:57) title
+border
+/v 1 store
+/x0 x v get 3.147420 add sx cw mul add store
+/y0 y v get bfs th add sub store
+x0 y0 moveto
+(    ) p
+(void) k
+( space_object::SetAll\(string name, ) p
+(int) k
+( life, ) p
+(double) k
+( sizeX, ) p
+(double) k
+( sizeY,) p n
+( ) S
+(int) k
+( windowSizeX, ) p
+(int) k
+( windowSizeY, ) p
+(double) k
+( MaxSpeed , ) p
+(double) k
+( x[], ) p
+(double) k
+( y[]\){) p n
+() N
+(        ) S
+(this) K
+(->name = name;) p n
+(        ) S
+(this) K
+(->life = life;) p n
+(        ) S
+(this) K
+(->sizeX = sizeX;) p n
+(        ) S
+(this) K
+(->sizeY = sizeY;) p n
+(        ) S
+(this) K
+(->windowSizeX = windowSizeX;) p n
+(        ) S
+(this) K
+(->windowSizeY = windowSizeY;) p n
+(        ) S
+(this) K
+(->MaxSpeed = MaxSpeed;) p n
+(        ) S
+(for) K
+(\() p
+(int) k
+( i=0; i<3; i ++\) ) p
+(this) K
+(-> x[i] = x[i];) p n
+(        ) S
+(for) K
+(\() p
+(int) k
+( i=0; i<3; i ++\) ) p
+(this) K
+(-> y[i] = y[i];) p n
+() N
+(    }) N
+() N
+(    ) S
+(void) k
+( space_object::GetAll\(\){) p n
+() N
+(        ) S
+(//Check control) c n
+(        cout<< endl) p n
+(            << ") S
+(Name: ) str
+(" << name << endl) p n
+(            << ") S
+(Life: ) str
+(" << life << endl) p n
+(            <<  ") S
+(WindowSizeX: ) str
+(" << windowSizeX << endl) p n
+(            <<  ") S
+(WindowSizeY: ) str
+(" << windowSizeY << endl) p n
+(            <<  ") S
+(MaxSpeed:  ) str
+("    << MaxSpeed << endl) p n
+(            <<  ") S
+(   Rotation:   ) str
+(" << phy << endl) p n
+(            <<  ") S
+(   Position: \() str
+("    << x[0]<< ") p
+(,) str
+("<<y[0]<<") p
+(\)) str
+(") p n
+(            <<  ") S
+(   Vitesse: \() str
+("     << x[1]<< ") p
+(,) str
+("<<y[1]<<") p
+(\)) str
+(") p n
+(            <<  ") S
+(   acceleration: \() str
+("<< x[2]<< ") p
+(,) str
+("<<y[2]<<") p
+(\)\\n) str
+(";) p n
+(    }) N
+() N
+(    space_object::space_object\(string name, ) S
+(double) k
+( gravity, ) p
+(int) k
+( life, Color colo) p n
+(r, string picture, ) S
+(double) k
+( sizeX, ) p
+(double) k
+( sizeY, ) p
+(int) k
+( windowSizeX, ) p
+(int) k
+( windowSizeY,) p n
+( ) S
+(double) k
+( MaxSpeed , ) p
+(double) k
+( x[], ) p
+(double) k
+( y[], ) p
+(double) k
+( phy\){) p n
+() N
+(        ) S
+(this) K
+(-> name = name;) p n
+(        ) S
+(this) K
+(-> life = life;) p n
+(        ) S
+(this) K
+(-> gravity = gravity;) p n
+(        ) S
+(this) K
+(-> sizeX = sizeX;) p n
+(        ) S
+(this) K
+(-> sizeY = sizeY;) p n
+(        ) S
+(this) K
+(-> windowSizeX = windowSizeX;) p n
+(        ) S
+(this) K
+(-> windowSizeY = windowSizeY;) p n
+(        ) S
+(this) K
+(-> MaxSpeed = MaxSpeed;) p n
+(        ) S
+(this) K
+(-> phy = phy;) p n
+(        ) S
+(for) K
+(\() p
+(int) k
+( i=0; i<3; i ++\) ) p
+(this) K
+(-> x[i] = x[i];) p n
+(        ) S
+(for) K
+(\() p
+(int) k
+( i=0; i<3; i ++\) ) p
+(this) K
+(-> y[i] = y[i];) p n
+(        ) S
+(this) K
+(-> texture.loadFromFile\(picture\);) p n
+(        ) S
+(this) K
+(-> texture.setSmooth\() p
+(true) k
+(\);) p n
+(        ) S
+(this) K
+(-> shape.setTextureRect\(IntRect\(0,0,sizeX,sizeY\)\);) p n
+(        ) S
+(this) K
+(-> shape.setOrigin\(sizeX/2.,sizeY/2.\);) p n
+(        ) S
+(this) K
+(-> shape.setRotation\(phy - 90\);) p n
+(        ) S
+(this) K
+(-> shape.setTexture\(texture\);) p n
+(    }) N
+() N
+(    space_object::space_object\() S
+(int) k
+( windowSizeX, ) p
+(int) k
+( windowSizeY\){) p n
+() N
+(        ) S
+(this) K
+(->name = "";) p n
+(        ) S
+(this) K
+(->sizeX = 10; ) p
+(// in px) c n
+(        ) p
+(this) K
+(->sizeY = 10;) p n
+(        ) S
+(this) K
+(->windowSizeX = windowSizeX; ) p
+(// in px) c n
+(        ) p
+(this) K
+(->windowSizeY = windowSizeY; ) p
+(// in px) c n
+(        ) p
+(this) K
+(->MaxSpeed = 60; ) p
+(// in px/s) c n
+(        ) p
+(this) K
+(-> x[0] = sizeX; ) p
+(this) K
+(-> x[1] = 0.; ) p
+(this) K
+(-> x[2] = 0.;) p n
+(        ) S
+(this) K
+(-> y[0] = sizeY; ) p
+(this) K
+(-> y[1] = 0.; ) p
+(this) K
+(-> y[2] = 0.;) p n
+(    }) N
+(    space_object::~space_object\(\){ cout<< endl << name << ") S
+( Destroyed...) str
+(";}) p n
+() N
+(//Class Shot that defines the object our spacecraft will create each time it fir) c n
+(es) N
+(class) K
+( Shot: ) p
+(public) K
+( space_object {) p n
+(definitions.cpp) (Page 4/15) (d\303\251c. 08, 19 23:57) title
+border
+grestore
+(Printed by Romeo) rhead
+(definitions.cpp) (2/8) (lundi d\303\251cembre 09, 2019) footer
+end % of iso1dict
+pagesave restore
+showpage
+%%Page: (5-6) 3
+%%BeginPageSetup
+/pagesave save def
+sh 0 translate 90 rotate
+%%EndPageSetup
+iso1dict begin
+gsave
+llx lly 12 add translate
+/v 0 store
+/x0 x v get 3.147420 add sx cw mul add store
+/y0 y v get bfs th add sub store
+x0 y0 moveto
+() p n
+() S 8 T () S
+(private) K
+(:) p n
+() N
+(        ) S
+(double) k
+( ttl; ) p
+(// TEMPS DE VIE DU MISSILE) c n
+() p n
+(        ) S
+(double) k
+( createdTime;) p n
+() N
+() S 8 T () S
+(public) K
+(:) p n
+() N
+(        ) S
+(void) k
+( UpdatePosition\(\){) p n
+(            ) N
+(            cout<< ") S
+(\\n........................BigLol........................) str
+("<<endl;) p n
+(            rk4\(3, 0., x, 1e-1\);) N
+(            rk4\(3, 0., y, 1e-1\);) N
+(            ApplyLimits\(\);) N
+(            shape.setPosition\(x[0],y[0]\);) N
+(            shape.setRotation\(phy-90\);) N
+() N
+(        }    ) N
+() N
+(        ) S
+(void) k
+( externalForce\(space_object& a\){) p n
+(            ) N
+(            ) S
+(//cout << "distance de la planete: " << distance\(a\);) c n
+() p n
+(            x[2] += a.gravity * \(a.x[0]-x[0]\)*pow\(distance\(a\),-3\);) N
+(            y[2] += a.gravity * \(a.y[0]-y[0]\)*pow\(distance\(a\),-3\);) N
+() N
+(            ) N
+(        }) N
+() N
+(        ) S
+(// SUPRESSION DU MISSILE SI TEMPS DE VIE EXPIRE) c n
+(        ) p
+(bool) k
+( LivingTime\(\){) p n
+(            ) S
+(return) K
+( \(GetTickCount\(\) - createdTime >= ttl\);) p n
+(        }) N
+() N
+(        ) S
+(//Shot Consructor) c n
+(        Shot\(string name, ) p
+(double) k
+( gravity, ) p
+(int) k
+( life, Color color, string picture,) p n
+( ) S
+(double) k
+( sizeX, ) p
+(double) k
+( sizeY, ) p
+(double) k
+( ttl, ) p
+(int) k
+( windowSizeX, ) p
+(int) k
+( windowSizeY, ) p
+(doubl) k n
+(e) S
+( MaxSpeed , ) p
+(double) k
+( x[], ) p
+(double) k
+( y[],) p
+(double) k
+( phy\):space_object\(name, gravity, life) p n
+(, color, picture, sizeX, sizeY, windowSizeX, windowSizeY, MaxSpeed , x, y,phy\){) N
+(            ) S
+(this) K
+(-> ttl = ttl;) p n
+(            ) S
+(this) K
+(-> createdTime = GetTickCount\(\);) p n
+(        }) N
+() N
+(        ) S
+(// SUPPRIME LE MISSILE) c n
+(        ~Shot\(\){}) p n
+() N
+(};) N
+() N
+(//Class that defines players it inherits methodes and variables from space objec) c n
+(t class) N
+(class) K
+( ship: ) p
+(public) K
+( space_object{) p n
+() N
+() S 8 T () S
+(private) K
+(:) p n
+() N
+( ) S 8 T () S 16 T () S
+(void) k
+( dynamics\() p
+(int) k
+( n, ) p
+(double) k
+( t, ) p
+(double) k
+( y[], ) p
+(double) k
+( dy[]\){) p n
+() N
+(    ) S 8 T () S 16 T (dy[0] = y[1];) N
+(    ) S 8 T () S 16 T (dy[1] = y[2] - 0.7*y[1]; ) S
+(// -y[1] is a non conservative force \(i) c n
+(t makes the control of the spacecraft easier\)) N
+() p n
+() S 8 T () S 16 T (}) N
+() N
+(        ) N
+() N
+(    ) S
+(public) K
+(:) p n
+() N
+(        ) S
+(// Number of shots currently in use) c n
+(        ) p
+(int) k
+( shotsUsed;) p n
+(definitions.cpp) (Page 5/15) (d\303\251c. 08, 19 23:57) title
+border
+/v 1 store
+/x0 x v get 3.147420 add sx cw mul add store
+/y0 y v get bfs th add sub store
+x0 y0 moveto
+() p n
+(        ) S
+(// Max number of allowed shots) c n
+(        ) p
+(int) k
+( maxShots;) p n
+() N
+(        ) S
+(// Minimum time between each shot \(ms\)) c n
+(        ) p
+(unsigned) k
+( ) p
+(int) k
+( shotCooldown;) p n
+() N
+(        ) S
+(// Time last shot was fired) c n
+(        ) p
+(unsigned) k
+( ) p
+(int) k
+( lastShotTime;) p n
+() N
+(        ) S
+(bool) k
+( firing;) p n
+() S 8 T () N
+(        ) S
+(//Vectors of shots fired \(Misils or Bullets?\) And ships) c n
+(        vector<Shot> ShotsInSpace;) p n
+(        ) N
+(        ) S
+(void) k
+( GetAll\(\){) p n
+() N
+(            ) S
+(//Check control) c n
+(            cout << endl) p n
+(                 <<  ") S
+(Name: ) str
+(" << GetName\(\) << endl) p n
+(                 <<  ") S
+(Life: ) str
+(" << life << endl) p n
+(                 <<  ") S
+(WindowSizeX: ) str
+(" << GetWindowSizeX\(\) << endl) p n
+(                 <<  ") S
+(WindowSizeY: ) str
+(" << GetWindowSizeY\(\) << endl) p n
+(                 <<  ") S
+(MaxSpeed:  ) str
+("    << GetMaxSpeed\(\) << endl) p n
+(                 <<  ") S
+(Shots fired vector size:  ) str
+(" << \(ShotsInSpace.size\(\)\) << endl) p n
+(                 <<  ") S
+(Time \(in ms\):  ) str
+("<< GetTickCount\(\) << endl) p n
+(                 <<  ") S
+(   Rotation:   ) str
+(" << phy << endl) p n
+(                 <<  ") S
+(   Position: \() str
+("    << GetVectorX\(\)[0]<< ") p
+(,) str
+("<<GetVectorY\(\)[0]<<") p
+(\)) str
+() p n
+(") N
+(                 <<  ") S
+(   Vitesse: \() str
+("     << GetVectorX\(\)[1]<< ") p
+(,) str
+("<<GetVectorY\(\)[1]<<") p
+(\)) str
+() p n
+(") N
+(                 <<  ") S
+(   acceleration: \() str
+("<< GetVectorX\(\)[2]<< ") p
+(,) str
+("<<GetVectorY\(\)[2]<<") p
+(\)\\n) str
+() p n
+(";) N
+(        }) N
+(        ) N
+(        ) S
+(// Create a new shot and ensures that it doesn't goes like crazy) c n
+(    ) p 8 T () S
+(void) k
+( Fire\(\);) p n
+() N
+(        ) S
+(// Release one shot slot) c n
+() p 8 T (    ) S
+(void) k
+( EndFire\(\);) p n
+() N
+() S 8 T (    ) S
+(// Allow a new shot to be fired immediately if any slots free) c n
+() p 8 T (    ) S
+(void) k
+( ResetShotCooldown\(\);) p n
+() N
+(        ) S
+(//Add control over the ship) c n
+(        ) p
+(virtual) K
+( ) p
+(void) k
+( GetInput\() p
+(int) k
+( sensibility\);) p n
+() N
+(        ship\(string name, ) S
+(double) k
+( gravity, ) p
+(int) k
+( life, Color color, string picture,) p n
+( ) S
+(double) k
+( sizeX,) p
+(double) k
+( sizeY, ) p
+(int) k
+( maxShots, ) p
+(int) k
+( windowSizeX, ) p
+(int) k
+( windowSizeY, ) p
+(doub) k n
+(le) S
+( MaxSpeed, ) p
+(double) k
+( x[], ) p
+(double) k
+( y[], ) p
+(double) k
+( phy\);) p n
+(        ship\() S
+(int) k
+( windowSizeX, ) p
+(int) k
+( windowSizeY\):space_object\(windowSizeX,windowSi) p n
+(zeY\){};) N
+(        ~ship\(\);) N
+(};) N
+() N
+(//Methods related to ship objects) c n
+() p n
+(    ) S
+(void) k
+( ship::Fire\(\){) p n
+() N
+(            ) S
+(// Don't fire unless the cooldown period has expired) c n
+(            ) p
+(if) K
+( \(\(GetTickCount\(\) - lastShotTime\) >= shotCooldown\)) p n
+(            {) N
+(                ) N
+(                ) S
+(// Don't fire if the maximum number of Shots are already on scre) c n
+(en) N
+(                ) p
+(if) K
+( \(shotsUsed < maxShots\)) p n
+(                {) N
+() N
+(                    ) S
+(double) k
+( x[]={GetVectorX\(\)[0], GetDirectionX\(\)*5e2, 0};) p n
+(definitions.cpp) (Page 6/15) (d\303\251c. 08, 19 23:57) title
+border
+grestore
+(Printed by Romeo) rhead
+(definitions.cpp) (3/8) (lundi d\303\251cembre 09, 2019) footer
+end % of iso1dict
+pagesave restore
+showpage
+%%Page: (7-8) 4
+%%BeginPageSetup
+/pagesave save def
+sh 0 translate 90 rotate
+%%EndPageSetup
+iso1dict begin
+gsave
+llx lly 12 add translate
+/v 0 store
+/x0 x v get 3.147420 add sx cw mul add store
+/y0 y v get bfs th add sub store
+x0 y0 moveto
+(                    ) p
+(double) k
+( y[]={GetVectorY\(\)[0], GetDirectionY\(\)*5e2, 0};) p n
+(                    ) N
+(                    ) S
+(// Makes new Shot) c n
+(                    Shot shot\( ") p
+(Boom... ) str
+(", 1., 3, Color::Black, ") p
+(spaceMissil.png) str
+(", 20,) p n
+( 35, 3e3, GetWindowSizeX\(\), GetWindowSizeY\(\), 2e2, x, y, phy + 180\);) N
+(                    ) N
+(                    ) S
+(//Stores it in a vector) c n
+(                    \() p
+(this) K
+(->ShotsInSpace\).push_back\(shot\);) p n
+(                    ) N
+(                    ) S
+(// Last Shot fired now!!!!) c n
+(                    lastShotTime = GetTickCount\(\);) p n
+(                    shotsUsed++;) N
+() N
+(                }) N
+(            }) N
+(            ) N
+(        }) N
+() N
+(    ) N
+(    ) S
+(// Stop firing a bullet \(called back when a Bullet object is destroyed\)) c n
+(    ) p
+(void) k
+( ship::EndFire\(\){) p n
+(        shotsUsed = max\(shotsUsed - 1, 0\);) N
+(    }) N
+() N
+(    ) S
+(// Reset cooldown \(used when fire key is released\)) c n
+(    ) p
+(void) k
+( ship::ResetShotCooldown\(\){) p n
+(        lastShotTime = 0;) N
+(    }) N
+() N
+() N
+(    ) S
+(void) k
+( ship::GetInput\() p
+(int) k
+( sensibility\){) p n
+() N
+(            ) S
+(if) K
+( \( Keyboard::isKeyPressed\(sf::Keyboard::Left\) \)  {        ) p
+(this) K
+(->ph) p n
+(y   += -sensibility;) N
+(                ) S
+(if) K
+( \( Keyboard::isKeyPressed\(sf::Keyboard::Up\) \){        ) p
+(this) K
+(->tr) p n
+(ust += sensibility;) N
+(                    ) S
+(if) K
+( \( Keyboard::isKeyPressed\(sf::Keyboard::Space\) \) firing = ) p
+() k n
+(true) S
+(;) p n
+(                    ) S
+(else) K
+( firing = ) p
+(false) k
+(;) p n
+(                }) N
+(                ) S
+(else) K
+( ) p
+(if) K
+( \( Keyboard::isKeyPressed\(sf::Keyboard::Down\) \){ ) p
+(this) K
+(->tr) p n
+(ust += -sensibility;) N
+(                    ) S
+(if) K
+( \( Keyboard::isKeyPressed\(sf::Keyboard::Space\) \) firing = ) p
+() k n
+(true) S
+(;) p n
+(                    ) S
+(else) K
+( firing = ) p
+(false) k
+(;) p n
+(                }) N
+(                ) S
+(else) K
+( ) p
+(if) K
+( \( Keyboard::isKeyPressed\(sf::Keyboard::Space\) \) firing =) p n
+( ) S
+(true) k
+(;) p n
+(                ) S
+(else) K
+( firing = ) p
+(false) k
+(;) p n
+(            }) N
+() N
+(            ) S
+(else) K
+( ) p
+(if) K
+( \( Keyboard::isKeyPressed\(sf::Keyboard::Right\) \) {   ) p
+(this) K
+(->ph) p n
+(y   += +sensibility;) N
+(                ) S
+(if) K
+( \( Keyboard::isKeyPressed\(sf::Keyboard::Up\) \){         ) p
+(this) K
+(->t) p n
+(rust += sensibility;) N
+(                    ) S
+(if) K
+( \( Keyboard::isKeyPressed\(sf::Keyboard::Space\) \) firing = ) p
+() k n
+(true) S
+(;) p n
+(                    ) S
+(else) K
+( firing = ) p
+(false) k
+(;) p n
+(                }) N
+(                ) S
+(else) K
+( ) p
+(if) K
+( \( Keyboard::isKeyPressed\(sf::Keyboard::Down\) \){  ) p
+(this) K
+(->t) p n
+(rust += -sensibility;) N
+(                    ) S
+(if) K
+( \( Keyboard::isKeyPressed\(sf::Keyboard::Space\) \) firing = ) p
+() k n
+(true) S
+(;) p n
+(                    ) S
+(else) K
+( firing = ) p
+(false) k
+(;) p n
+(                }) N
+(                ) S
+(else) K
+( ) p
+(if) K
+( \( Keyboard::isKeyPressed\(sf::Keyboard::Space\) \) firing =) p n
+( ) S
+(true) k
+(;) p n
+(                ) S
+(else) K
+( firing = ) p
+(false) k
+(;) p n
+(            }) N
+(definitions.cpp) (Page 7/15) (d\303\251c. 08, 19 23:57) title
+border
+/v 1 store
+/x0 x v get 3.147420 add sx cw mul add store
+/y0 y v get bfs th add sub store
+x0 y0 moveto
+(            ) p
+(else) K
+( ) p
+(if) K
+( \( Keyboard::isKeyPressed\(sf::Keyboard::Up\) \){        ) p
+(this) K
+(->t) p n
+(rust += sensibility;) N
+(                ) S
+(if) K
+( \( Keyboard::isKeyPressed\(sf::Keyboard::Space\) \) firing = ) p
+(true) k
+() p n
+(;) N
+(                ) S
+(else) K
+( firing = ) p
+(false) k
+(;) p n
+(            }) N
+(            ) S
+(else) K
+( ) p
+(if) K
+( \( Keyboard::isKeyPressed\(sf::Keyboard::Down\) \){      ) p
+(this) K
+(->t) p n
+(rust += -sensibility;) N
+(                ) S
+(if) K
+( \( Keyboard::isKeyPressed\(sf::Keyboard::Space\) \) firing = ) p
+(true) k
+() p n
+(;) N
+(                ) S
+(else) K
+( firing = ) p
+(false) k
+(;) p n
+(            }) N
+() N
+(            ) S
+(else) K
+( ) p
+(if) K
+( \( Keyboard::isKeyPressed\(sf::Keyboard::Space\) \) firing = ) p
+(tru) k n
+(e) S
+(;) p n
+(            ) S
+(else) K
+( {) p n
+() N
+(                trust = 0.;) N
+(                ) S
+(this) K
+(->GetVectorX\(\)[2] = 0.;) p n
+(                ) S
+(this) K
+(->GetVectorY\(\)[2] = 0.;) p n
+(                ResetShotCooldown\(\);) N
+(                firing = ) S
+(false) k
+(;) p n
+(            ) N
+(            }) N
+() N
+(            GetVectorX\(\)[2] = trust*GetDirectionX\(\);) N
+(            GetVectorY\(\)[2] = trust*GetDirectionY\(\);) N
+() N
+(        }) N
+() N
+(    ship::ship\(string name, ) S
+(double) k
+( gravity, ) p
+(int) k
+( life, Color color, string pictur) p n
+(e, ) S
+(double) k
+( sizeX, ) p
+(double) k
+( sizeY, ) p
+(int) k
+( maxShots, ) p
+(int) k
+( windowSizeX, ) p
+(int) k
+( windowSizeY, ) p
+(d) k n
+(ouble) S
+( MaxSpeed , ) p
+(double) k
+( x[], ) p
+(double) k
+( y[],) p
+(double) k
+( phy\):space_object\(name, gravity, ) p n
+(life, color, picture, sizeX, sizeY, windowSizeX, windowSizeY, MaxSpeed , x, y, p) N
+(hy\){) N
+(        ) S
+(this) K
+(->maxShots = maxShots;) p n
+(        ) S
+(this) K
+(->shotsUsed = 0;) p n
+(        ) S
+(this) K
+(->lastShotTime = GetTickCount\(\);) p n
+(        ) S
+(this) K
+(->firing = ) p
+(false) k
+(;) p n
+(        ) S
+(this) K
+(->shotCooldown = 500; ) p
+(// Time between each shot if fired continously) c n
+( \(in ms\)) N
+(    }) p n
+(    ship::~ship\(\){}) N
+() N
+(//Defines the player 2) c n
+(class) K
+( ship2: ) p
+(public) K
+( ship{) p n
+(    ) S
+(private) K
+(:) p n
+() N
+(    ) S
+(public) K
+(:) p n
+() N
+(        ) S
+(void) k
+( GetInput\() p
+(int) k
+( sensibility\);) p n
+() N
+(        ship2\(string name, ) S
+(double) k
+( gravity, ) p
+(int) k
+( life, Color color, string picture) p n
+(, ) S
+(double) k
+( sizeX,) p
+(double) k
+( sizeY, ) p
+(int) k
+( maxShots, ) p
+(int) k
+( windowSizeX, ) p
+(int) k
+( windowSizeY, ) p
+(dou) k n
+(ble) S
+( MaxSpeed, ) p
+(double) k
+( x[], ) p
+(double) k
+( y[], ) p
+(double) k
+( phy\):ship\( name, gravity, life, col) p n
+(or, picture, sizeX, sizeY, maxShots, windowSizeX, windowSizeY, MaxSpeed, x, y, p) N
+(hy \){}) N
+(        ~ship2\(\){}) N
+(};) N
+() N
+(void) k
+( ship2::GetInput\() p
+(int) k
+( sensibility\){) p n
+() N
+(    ) S
+(if) K
+( \( Keyboard::isKeyPressed\(sf::Keyboard::Q\) \)  {        ) p
+(this) K
+(->phy   += -sen) p n
+(sibility;) N
+(        ) S
+(if) K
+( \( Keyboard::isKeyPressed\(sf::Keyboard::Z\) \){        ) p
+(this) K
+(->trust += se) p n
+(nsibility;) N
+(            ) S
+(if) K
+( \( Keyboard::isKeyPressed\(sf::Keyboard::F\) \) firing = ) p
+(true) k
+(;) p n
+(            ) S
+(else) K
+( firing = ) p
+(false) k
+(;) p n
+(        }) N
+(definitions.cpp) (Page 8/15) (d\303\251c. 08, 19 23:57) title
+border
+grestore
+(Printed by Romeo) rhead
+(definitions.cpp) (4/8) (lundi d\303\251cembre 09, 2019) footer
+end % of iso1dict
+pagesave restore
+showpage
+%%Page: (9-10) 5
+%%BeginPageSetup
+/pagesave save def
+sh 0 translate 90 rotate
+%%EndPageSetup
+iso1dict begin
+gsave
+llx lly 12 add translate
+/v 0 store
+/x0 x v get 3.147420 add sx cw mul add store
+/y0 y v get bfs th add sub store
+x0 y0 moveto
+(        ) p
+(else) K
+( ) p
+(if) K
+( \( Keyboard::isKeyPressed\(sf::Keyboard::S\) \){ ) p
+(this) K
+(->trust += -sen) p n
+(sibility;) N
+(            ) S
+(if) K
+( \( Keyboard::isKeyPressed\(sf::Keyboard::F\) \) firing = ) p
+(true) k
+(;) p n
+(            ) S
+(else) K
+( firing = ) p
+(false) k
+(;) p n
+(        }) N
+(        ) S
+(else) K
+( ) p
+(if) K
+( \( Keyboard::isKeyPressed\(sf::Keyboard::F\) \) firing = ) p
+(true) k
+(;) p n
+(        ) S
+(else) K
+( firing = ) p
+(false) k
+(;) p n
+(    }) N
+() N
+(    ) S
+(else) K
+( ) p
+(if) K
+( \( Keyboard::isKeyPressed\(sf::Keyboard::D\) \) {   ) p
+(this) K
+(->phy   += +sens) p n
+(ibility;) N
+(        ) S
+(if) K
+( \( Keyboard::isKeyPressed\(sf::Keyboard::Z\) \){         ) p
+(this) K
+(->trust += s) p n
+(ensibility;) N
+(            ) S
+(if) K
+( \( Keyboard::isKeyPressed\(sf::Keyboard::F\) \) firing = ) p
+(true) k
+(;) p n
+(            ) S
+(else) K
+( firing = ) p
+(false) k
+(;) p n
+(        }) N
+(        ) S
+(else) K
+( ) p
+(if) K
+( \( Keyboard::isKeyPressed\(sf::Keyboard::S\) \){  ) p
+(this) K
+(->trust += -se) p n
+(nsibility;) N
+(            ) S
+(if) K
+( \( Keyboard::isKeyPressed\(sf::Keyboard::F\) \) firing = ) p
+(true) k
+(;) p n
+(            ) S
+(else) K
+( firing = ) p
+(false) k
+(;) p n
+(        }) N
+(        ) S
+(else) K
+( ) p
+(if) K
+( \( Keyboard::isKeyPressed\(sf::Keyboard::F\) \) firing = ) p
+(true) k
+(;) p n
+(        ) S
+(else) K
+( firing = ) p
+(false) k
+(;) p n
+(    }) N
+(    ) S
+(else) K
+( ) p
+(if) K
+( \( Keyboard::isKeyPressed\(sf::Keyboard::Z\) \){        ) p
+(this) K
+(->trust += s) p n
+(ensibility;) N
+(        ) S
+(if) K
+( \( Keyboard::isKeyPressed\(sf::Keyboard::F\) \) firing = ) p
+(true) k
+(;) p n
+(        ) S
+(else) K
+( firing = ) p
+(false) k
+(;) p n
+(    }) N
+(    ) S
+(else) K
+( ) p
+(if) K
+( \( Keyboard::isKeyPressed\(sf::Keyboard::S\) \){      ) p
+(this) K
+(->trust += -se) p n
+(nsibility;) N
+(        ) S
+(if) K
+( \( Keyboard::isKeyPressed\(sf::Keyboard::F\) \) firing = ) p
+(true) k
+(;) p n
+(        ) S
+(else) K
+( firing = ) p
+(false) k
+(;) p n
+(    }) N
+() N
+(    ) S
+(else) K
+( ) p
+(if) K
+( \( Keyboard::isKeyPressed\(sf::Keyboard::F\) \) firing = ) p
+(true) k
+(;) p n
+(    ) S
+(else) K n
+(    {) p n
+(        trust = 0.;) N
+(        ) S
+(this) K
+(->GetVectorX\(\)[2] = 0.;) p n
+(        ) S
+(this) K
+(->GetVectorY\(\)[2] = 0.;) p n
+(        ResetShotCooldown\(\);) N
+(        firing = ) S
+(false) k
+(;) p n
+(    }) N
+() N
+(    GetVectorX\(\)[2] = trust*GetDirectionX\(\);) N
+(    GetVectorY\(\)[2] = trust*GetDirectionY\(\);) N
+() N
+(}) N
+() N
+(//Class that defines the planets) c n
+(class) K
+( planet: ) p
+(public) K
+( space_object{) p n
+() N
+(    ) S
+(private) K
+(:) p n
+() N
+() N
+(    ) S
+(public) K
+(:) p n
+(        ) N
+(        ) S
+(void) k
+( UpdatePosition\(\){) p n
+(                ) N
+(                cout<<") S
+(\\nLOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOL) str
+(";) p n
+(                rk4\(3, 0., x, 1e-1\);) N
+(                rk4\(3, 0., y, 1e-1\);) N
+(                ApplyLimits\(\);) N
+(                shape.setPosition\(x[0],y[0]\);) N
+(                shape.setRotation\(phy - 90\);) N
+() N
+(            }) N
+() N
+(definitions.cpp) (Page 9/15) (d\303\251c. 08, 19 23:57) title
+border
+/v 1 store
+/x0 x v get 3.147420 add sx cw mul add store
+/y0 y v get bfs th add sub store
+x0 y0 moveto
+(        ) p
+(double) k
+( RandPosition\() p
+(double) k
+( sup\){) p n
+() N
+(            ) S
+(return) K
+( rand\(\)%\() p
+(int) k
+(\)abs\(sup\)-0.5*sup;) p n
+() N
+(        }) N
+() N
+(        planet\(string name, ) S
+(double) k
+( gravity, ) p
+(int) k
+( life, Color color, string pictur) p n
+(e, ) S
+(double) k
+( sizeX, ) p
+(double) k
+( sizeY, ) p
+(int) k
+( windowSizeX, ) p
+(int) k
+( windowSizeY, ) p
+(double) k
+( MaxSpeed) p n
+(, ) S
+(double) k
+( x[], ) p
+(double) k
+( y[], ) p
+(double) k
+( phy\):space_object\( name, gravity, life, color, ) p n
+(picture, sizeX, sizeY, windowSizeX, windowSizeY, MaxSpeed, x, y, phy\){}) N
+(        ~planet\(\){}) N
+() N
+(};) N
+() N
+() N
+(int) k
+( main\(\){) p n
+() N
+(    ) S
+(/// Menu ....) c n
+() p n
+(        system\(") S
+(clear) str
+("\);) p n
+(        ) S
+(int) k
+( windowSizeX = 1200, windowSizeY = 700;) p n
+(        ) N
+(        string name1,name2;) N
+() N
+(        cout << ") S
+(\\nInserez le nom du joueur N\302\2601: ) str
+(";cin >> name1;) p n
+(        cout << ") S
+(\\nInserez le nom du joueur N\302\2602: ) str
+(";cin >> name2;) p n
+() N
+(        cout << ") S
+(\\nInserez la taille horizontale de la fenetre de jeu: ) str
+(";   cin >> windowSizeX;) p n
+(        cout << ") S
+(\\nInserez la taille verticale de la fenetre de jeu: ) str
+(";     cin >> windowSizeY;) p n
+(    ) N
+(    ) S
+(/// PROPRIETES DU FOND ....) c n
+(        ) p n
+(        ) N
+(        RenderWindow window\(VideoMode\(windowSizeX, windowSizeY\), ") S
+(Spacecraft Moveme) str n
+(nt) S
+("\);) p n
+(        window.setFramerateLimit\(40\);) N
+(        Texture t1;) N
+(        t1.loadFromFile\(") S
+(blue.png) str
+("\);) p n
+(        t1.setRepeated\() S
+(true) k
+(\);) p n
+(        Sprite sFond\(t1,IntRect\(0,0,windowSizeX,windowSizeY\)\);) N
+() N
+(    ) S
+(/// PROPRIETES DES OBJETS ....) c n
+(    ) p n
+(        ) S
+(double) k
+( textX = 0,textY = 0;) p n
+(        ) S
+(double) k
+( sizeX = 100, sizeY = 94;     ) p
+(// dimensions of the ship) c n
+(        ) p
+(double) k
+( sizePX = 215, sizePY = 211;  ) p
+(// dimensions of the planet) c n
+(        ) p n
+(        ) S
+(double) k
+( gravity = 1e7;) p n
+(        ) S
+(int) k
+( life = 100;) p n
+(        ) N
+(        ) S
+(double) k
+( x[]={windowSizeX/4.,0.,0.},y[]={windowSizeY*0.5,0.,0.}; ) p
+(// positi) c n
+(on initiale du veseau x[0],y[0], vitesse x[1], y[1] et acceleration x[3], x) N
+(                                                            ) p
+(// x[2] et y[2] Inte) c n
+(nsit\303\251 des forces subies par le cercle exprimees dans la base canonique.) N
+(        ) p
+(int) k
+( vmax = 100, maxShots = 10;) p n
+(        ) S
+(double) k
+( phy = 0;) p n
+() N
+(    ) S
+(/// Objects ....) c n
+() p n
+(        ship p\(name1, gravity, life, Color::Green, ") S
+(spaceShip_01.png) str
+(", sizeX, sizeY) p n
+(, maxShots, windowSizeX, windowSizeY, vmax, x, y, phy\);) N
+() N
+(        vector<planet> PlanetsInSpace;) N
+(        planet mars\( ") S
+(Mars) str
+(", gravity, life, Color::Blue, ") p
+(meteor.png) str
+(", sizePX, size) p n
+(PY, windowSizeX, windowSizeY, vmax, x, y, phy \);) N
+(        ) N
+(        x[0]=windowSizeX*3/4.;y[0]=windowSizeY*0.5;) N
+(        sizeX = 106, sizeY = 80;) N
+(        ship2 p2\(name2, gravity, life, Color::Green, ") S
+(spaceShip_02.png) str
+(", sizeX, siz) p n
+(definitions.cpp) (Page 10/15) (d\303\251c. 08, 19 23:57) title
+border
+grestore
+(Printed by Romeo) rhead
+(definitions.cpp) (5/8) (lundi d\303\251cembre 09, 2019) footer
+end % of iso1dict
+pagesave restore
+showpage
+%%Page: (11-12) 6
+%%BeginPageSetup
+/pagesave save def
+sh 0 translate 90 rotate
+%%EndPageSetup
+iso1dict begin
+gsave
+llx lly 12 add translate
+/v 0 store
+/x0 x v get 3.147420 add sx cw mul add store
+/y0 y v get bfs th add sub store
+x0 y0 moveto
+(eY, maxShots, windowSizeX, windowSizeY, vmax, x, y, phy\);) p n
+(        planet moon\(") S
+(Moon) str
+(", gravity, life, Color::Blue, ") p
+(meteor.png) str
+(", sizePX, size) p n
+(PY, windowSizeX, windowSizeY, vmax, x, y, phy \);) N
+() N
+(        PlanetsInSpace.push_back\(mars\);) N
+(        PlanetsInSpace.push_back\(moon\);) N
+(        ) N
+(        Font mainFont;) N
+(        mainFont.loadFromFile\(") S
+(kenvector_future.ttf) str
+("\);) p n
+(        Font thinFont;) N
+(        thinFont.loadFromFile\(") S
+(kenvector_future_thin.ttf) str
+("\);) p n
+() N
+(        Text PlayerVictory;) N
+(        PlayerVictory.setFont\(mainFont\);) N
+(        PlayerVictory.setCharacterSize\(20\);) N
+(        PlayerVictory.setColor\( Color::White \);) N
+(        PlayerVictory.setPosition\(windowSizeX*0.5,windowSizeY*0.5\);) N
+() N
+(        Text playerData;) N
+(        playerData.setFont\(thinFont\);) N
+(        playerData.setCharacterSize\(20\);) N
+(        playerData.setFillColor\(Color::White\);) N
+(        playerData.setPosition\(windowSizeX*\(p.GetName\(\).length\(\)/\() S
+(double) k
+(\)windowS) p n
+(izeX\), 0\);) N
+(        ) N
+(        Text player2Data;) N
+(        player2Data.setFont\(thinFont\);) N
+(        player2Data.setCharacterSize\(20\);) N
+(        player2Data.setFillColor\(Color::White\);) N
+(        player2Data.setPosition\(windowSizeX*\(1 - 5*\(pow\(p2.GetName\(\).length\(\),2\)) N
+(/\() S
+(double) k
+(\)windowSizeX\)\), 0\);) p n
+() N
+(        RectangleShape boundShip0;) N
+(        RectangleShape boundShip1;) N
+() N
+(    ) S
+(while) K
+( \(window.isOpen\(\)\){) p n
+() N
+(        Event event;) N
+(        ) S
+(while) K
+( \(window.pollEvent\(event\)\){) p n
+(            ) S
+(if) K
+( \(event.type == Event::Closed\) window.close\(\);) p n
+(          }) N
+(        ) S
+(//Closses the window when you press \(x\)) c n
+() p n
+(        ) S
+(//Sets the background) c n
+() p 8 T () S 16 T (window.clear\(Color::Black\);) N
+(        window.draw\(sFond\);        ) N
+() N
+(        ) S
+(//clears the terminal) c n
+(        system\(") p
+(clear) str
+("\);    ) p n
+(    ) N
+(        ) S
+(//Updates all information about planets) c n
+() p n
+(            ) S
+(for) K
+( \() p
+(int) k
+( i = 0; i < \(PlanetsInSpace\).size\(\); i++\)) p n
+(            {) N
+(                ) S
+(//PlanetsInSpace[i].GetAll\(\);) c n
+(                PlanetsInSpace[i].UpdatePosition\(\);) p n
+(                ) S
+(//PlanetsInSpace[i].SetForces\(PlanetsInSpace[0].RandPosition\( 10) c n
+( \), PlanetsInSpace[0].RandPosition\( 10 \)\);) N
+(            }) p n
+(        ) S
+(/* ) c n
+(        //Trackers) N
+(            //Player 1) N
+(            boundShip0.setOrigin\(               p.shape.getOrigin\(\).x,          ) N
+(    p.shape.getOrigin\(\).y\);) N
+(            boundShip0.setPosition\(             p.shape.getPosition\(\).x,        ) N
+(    p.shape.getPosition\(\).y\);) N
+(            boundShip0.setSize\(sf::Vector2f\(    p.shape.getGlobalBounds\(\).width,) N
+(    p.shape.getGlobalBounds\(\).height\)\);) N
+(            boundShip0.setFillColor\(Color::Transparent\);) N
+(definitions.cpp) (Page 11/15) (d\303\251c. 08, 19 23:57) title
+border
+/v 1 store
+/x0 x v get 3.147420 add sx cw mul add store
+/y0 y v get bfs th add sub store
+x0 y0 moveto
+(            boundShip0.setOutlineThickness\(5\);) c n
+(            boundShip0.setOutlineColor\(Color::Magenta\);) N
+(            window.draw\(boundShip0\);) N
+(            ) N
+(            //Player 2) N
+(            boundShip1.setOrigin\(               p2.shape.getOrigin\(\).x,         ) N
+(    p2.shape.getOrigin\(\).y\);) N
+(            boundShip1.setPosition\(             p2.shape.getPosition\(\).x,       ) N
+(    p2.shape.getPosition\(\).y\);) N
+(            boundShip1.setSize\(sf::Vector2f\(    p2.shape.getGlobalBounds\(\).width) N
+(,   p2.shape.getGlobalBounds\(\).height\)\);) N
+(            boundShip1.setFillColor\(Color::Transparent\);) N
+(            boundShip1.setOutlineThickness\(5\);) N
+(            boundShip1.setOutlineColor\(Color::Magenta\);) N
+(            window.draw\(boundShip1\);) N
+(        */) N
+() p n
+() N
+(        ) S
+(//Player 1 Conditions    ) c n
+(        ) p
+(if) K
+( \( !p.isDead\(\) \){) p n
+(            ) S
+(//Get the input from the arrows in the keyboard for player1) c n
+(            p.GetInput\(3\);) p n
+(            ) S
+(if) K
+( \( p.firing \){) p n
+(                ) N
+(                cout<< endl << p.GetName\(\) + ") S
+(  Fireeee!!!!!!!) str
+(";) p n
+(                p.Fire\(\);) N
+(                ) S
+(//p.ShotsInSpace[0].GetAll\(\);) c n
+() p n
+(            }) N
+(        ) N
+(            ) S
+(//Sequence that updates all of the shots in space) c n
+(            ) p
+(for) K
+( \() p
+(int) k
+( i = 0 ; i < \(p.ShotsInSpace\).size\(\); i++\){) p n
+(                ) N
+(                \(p.ShotsInSpace[i]\).UpdatePosition\(\);    ) N
+(                \(p.ShotsInSpace[i]\).texture.loadFromFile\(") S
+(spaceMissil.png) str
+("\);) p n
+(                \(p.ShotsInSpace[i]\).shape.setTexture\(\(p.ShotsInSpace[i]\).texture) N
+(\);) N
+(              ) S
+(//\(p.ShotsInSpace[i]\).GetAll\(\);) c n
+(                \(p.ShotsInSpace[i]\).phy = 180 + \(180/M_PI\) * acos\(\(\(p.ShotsInSpa) p n
+(ce[i]\).x[1]\) * pow\( sqrt\( pow\(\(\(p.ShotsInSpace[i]\).x[1]\), 2\) + pow\( \(\(p.ShotsInS) N
+(pace[i]\).y[1]\), 2\) \) ,-1\)\);) N
+(                cout<< ") S
+(\\nPlayer 1:) str
+(") p n
+(                    << ") S
+(\\n Angle par le Cosinus: ) str
+("     << 180 + \(180/M_PI\) * acos\(\(\(p.Sh) p n
+(otsInSpace[i]\).x[1]\) * pow\( sqrt\( pow\(\(\(p.ShotsInSpace[i]\).x[1]\), 2\) + pow\( \(\(p.) N
+(ShotsInSpace[i]\).y[1]\), 2\) \) ,-1\)\) ) N
+(                    << ") S
+(\\n Angle par le Sinus: ) str
+("       << 180 + \(180/M_PI\) * asin\(\(\(p.Sh) p n
+(otsInSpace[i]\).y[1]\) * pow\( sqrt\( pow\(\(\(p.ShotsInSpace[i]\).x[1]\), 2\) + pow\( \(\(p.) N
+(ShotsInSpace[i]\).y[1]\), 2\) \) ,-1\)\);) N
+(                \(p.ShotsInSpace[i]\).SetForces\(0.,0.\);) N
+(                ) N
+(                \(p.ShotsInSpace[i]\).draw\(window\);) N
+(                ) N
+(                ) S
+(for) K
+( \() p
+(int) k
+( l = 0 ; l < \(PlanetsInSpace\).size\(\); l++\) ) p
+(if) K
+( \(!PlanetsI) p n
+(nSpace[l].isDead\(\)\) \(p.ShotsInSpace[i]\).externalForce\(PlanetsInSpace[l]\);) N
+() N
+(                ) S
+(//If the shot is no longer permited then erase) c n
+(                ) p
+(if) K
+(\( \(*\( \(p.ShotsInSpace\).begin\(\)+i \)\).LivingTime\(\)\) {) p n
+(                    p.EndFire\(\);) N
+(                    \(p.ShotsInSpace\).erase\(\(p.ShotsInSpace\).begin\(\)+ i\);) N
+(                }) N
+(                ) S
+(else) K
+( ) p
+(if) K
+( \( !PlanetsInSpace[0].isDead\(\) && \( \(p.ShotsInSpace\)[i].s) p n
+(hape.getGlobalBounds\(\).intersects\( PlanetsInSpace[0].shape.getGlobalBounds\(\) \) \)) N
+(\){) N
+(                    PlanetsInSpace[0].life -= 10;) N
+(                    p.EndFire\(\);) N
+(                    \(p.ShotsInSpace\).erase\(\(p.ShotsInSpace\).begin\(\)+ i\);) N
+(    ) N
+(                }) N
+(                ) S
+(else) K
+( ) p
+(if) K
+( \( !PlanetsInSpace[1].isDead\(\) && \( \(p.ShotsInSpace\)[i].s) p n
+(definitions.cpp) (Page 12/15) (d\303\251c. 08, 19 23:57) title
+border
+grestore
+(Printed by Romeo) rhead
+(definitions.cpp) (6/8) (lundi d\303\251cembre 09, 2019) footer
+end % of iso1dict
+pagesave restore
+showpage
+%%Page: (13-14) 7
+%%BeginPageSetup
+/pagesave save def
+sh 0 translate 90 rotate
+%%EndPageSetup
+iso1dict begin
+gsave
+llx lly 12 add translate
+/v 0 store
+/x0 x v get 3.147420 add sx cw mul add store
+/y0 y v get bfs th add sub store
+x0 y0 moveto
+(hape.getGlobalBounds\(\).intersects\( PlanetsInSpace[1].shape.getGlobalBounds\(\) \) \)) p n
+(\){) N
+(                    PlanetsInSpace[1].life -= 10;) N
+(                    p.EndFire\(\);) N
+(                    \(p.ShotsInSpace\).erase\(\(p.ShotsInSpace\).begin\(\)+ i\);) N
+(                }) N
+(                ) S
+(else) K
+( ) p
+(if) K
+( \(  \( \(p.ShotsInSpace\)[i].shape.getGlobalBounds\(\).interse) p n
+(cts\( p2.shape.getGlobalBounds\(\) \) \)\) {) N
+(                    p2.life -= 10;) N
+(                    \(p.ShotsInSpace\).erase\(\(p.ShotsInSpace\).begin\(\)+ i\);) N
+(                    }) N
+(            }) N
+(            ) N
+(            ) S
+(//Update position of all the elements related to the player p) c n
+(            p.UpdatePosition\(\);) p n
+(            ) N
+(            ) S
+(//Check control) c n
+(            ) p
+(//p.GetAll\(\);) c n
+(        }) p n
+() N
+(        ) S
+(//Player 2 Conditions) c n
+(        ) p
+(if) K
+( \( !p2.isDead\(\) \){) p n
+(            ) S
+(//Get the input from the arrows in the keyboard for player1) c n
+(            p2.GetInput\(3\);) p n
+(            ) S
+(if) K
+( \( p2.firing \){) p n
+(                ) N
+(                cout<< endl << p2.GetName\(\) + ") S
+( Fireeee!!!!!!!) str
+(";) p n
+(                p2.Fire\(\);) N
+(                ) S
+(//p2.ShotsInSpace[0].GetAll\(\);) c n
+() p n
+(            }) N
+(        ) N
+(            ) S
+(//Sequence that updates all of the shots in space) c n
+(            ) p
+(for) K
+( \() p
+(int) k
+( i = 0 ; i < \(p2.ShotsInSpace\).size\(\); i++\){) p n
+(                ) N
+(                \(p2.ShotsInSpace[i]\).UpdatePosition\(\);    ) N
+(                \(p2.ShotsInSpace[i]\).texture.loadFromFile\(") S
+(spaceMissil.png) str
+("\);) p n
+(                \(p2.ShotsInSpace[i]\).shape.setTexture\(\(p2.ShotsInSpace[i]\).textu) N
+(re\);) N
+(                ) S
+(//\(p2.ShotsInSpace[i]\).GetAll\(\);) c n
+(                \(p2.ShotsInSpace[i]\).phy = 180 + \(180/M_PI\) * acos\(\(\(p2.ShotsInS) p n
+(pace[i]\).x[1]\) * pow\( sqrt\( pow\(\(\(p2.ShotsInSpace[i]\).x[1]\), 2\) + pow\( \(\(p2.Shot) N
+(sInSpace[i]\).y[1]\), 2\) \) ,-1\)\);) N
+(                cout<< ") S
+(\\nPlayer2:) str
+(" ) p n
+(                    << ") S
+(\\n Angle par le Cosinus: ) str
+("     << 180 + \(180/M_PI\) * acos\(\(\(p2.S) p n
+(hotsInSpace[i]\).x[1]\) * pow\( sqrt\( pow\(\(\(p2.ShotsInSpace[i]\).x[1]\), 2\) + pow\( \(\() N
+(p2.ShotsInSpace[i]\).y[1]\), 2\) \) ,-1\)\) ) N
+(                    << ") S
+(\\n Angle par le Sinus: ) str
+("       << 180 + \(180/M_PI\) * asin\(\(\(p2.S) p n
+(hotsInSpace[i]\).y[1]\) * pow\( sqrt\( pow\(\(\(p2.ShotsInSpace[i]\).x[1]\), 2\) + pow\( \(\() N
+(p2.ShotsInSpace[i]\).y[1]\), 2\) \) ,-1\)\);) N
+(                \(p2.ShotsInSpace[i]\).SetForces\(0.,0.\);) N
+(                ) N
+(                \(p2.ShotsInSpace[i]\).draw\(window\);) N
+(                ) N
+(                ) S
+(for) K
+( \() p
+(int) k
+( l = 0 ; l < \(PlanetsInSpace\).size\(\); l++\) ) p
+(if) K
+( \(!PlanetsI) p n
+(nSpace[l].isDead\(\)\) \(p2.ShotsInSpace[i]\).externalForce\(PlanetsInSpace[l]\);) N
+() N
+(                ) S
+(//If the shot is no longer permited then erase) c n
+(                ) p
+(if) K
+(\( \(*\( \(p2.ShotsInSpace\).begin\(\)+i \)\).LivingTime\(\)\) {) p n
+(                    p2.EndFire\(\);) N
+(                    \(p2.ShotsInSpace\).erase\(\(p2.ShotsInSpace\).begin\(\)+ i\);) N
+(                }) N
+(                ) S
+(else) K
+( ) p
+(if) K
+( \( !PlanetsInSpace[0].isDead\(\) && \( \(p2.ShotsInSpace\)[i].) p n
+(shape.getGlobalBounds\(\).intersects\( PlanetsInSpace[0].shape.getGlobalBounds\(\) \) ) N
+(\)\){) N
+(                    PlanetsInSpace[0].life -= 10;) N
+(                    p2.EndFire\(\);) N
+(                    \(p2.ShotsInSpace\).erase\(\(p2.ShotsInSpace\).begin\(\)+ i\);) N
+(    ) N
+(definitions.cpp) (Page 13/15) (d\303\251c. 08, 19 23:57) title
+border
+/v 1 store
+/x0 x v get 3.147420 add sx cw mul add store
+/y0 y v get bfs th add sub store
+x0 y0 moveto
+(                }) p n
+(                ) S
+(else) K
+( ) p
+(if) K
+( \( !PlanetsInSpace[1].isDead\(\) && \( \(p2.ShotsInSpace\)[i].) p n
+(shape.getGlobalBounds\(\).intersects\( PlanetsInSpace[1].shape.getGlobalBounds\(\) \) ) N
+(\)\){) N
+(                    PlanetsInSpace[1].life -= 10;) N
+(                    p2.EndFire\(\);) N
+(                    \(p2.ShotsInSpace\).erase\(\(p2.ShotsInSpace\).begin\(\)+ i\);) N
+(                }) N
+(                ) S
+(else) K
+( ) p
+(if) K
+( \( !p.isDead\(\)  && \( \(p2.ShotsInSpace\)[i].shape.getGlobal) p n
+(Bounds\(\).intersects\( p.shape.getGlobalBounds\(\) \) \)\) {) N
+(                    p.life -= 10;) N
+(                    \(p2.ShotsInSpace\).erase\(\(p2.ShotsInSpace\).begin\(\)+ i\);) N
+(                    }) N
+() N
+(            }) N
+(            ) N
+(            ) S
+(//Update position of all the elements related to the player p2) c n
+(            p2.UpdatePosition\(\);) p n
+(            ) N
+(            ) S
+(//Check control) c n
+(            ) p
+(//p2.GetAll\(\);) c n
+(        }) p n
+(        ) S
+(//Affichage des planetes \(petite animation XD\)) c n
+(            ) p
+(for) K
+( \() p
+(int) k
+( i = 0 ; i < \(PlanetsInSpace\).size\(\); i++ \){) p n
+(                ) N
+(                ) S
+(if) K
+( \(75 < PlanetsInSpace[i].life && PlanetsInSpace[i].life <= 100) p n
+(\)) N
+(                {) N
+(                    PlanetsInSpace[i].texture.loadFromFile\(") S
+(spaceMeteors_001.png) str
+("\);) p n
+(                    PlanetsInSpace[i].texture.setSmooth\() S
+(true) k
+(\);) p n
+(                    PlanetsInSpace[i].shape.setTexture\(PlanetsInSpace[i].texture) N
+(\);) N
+(                }) N
+(                ) S
+(else) K
+( ) p
+(if) K
+( \( 50 < PlanetsInSpace[i].life && PlanetsInSpace[i].life ) p n
+(<= 75\)) N
+(                {) N
+(                    PlanetsInSpace[i].texture.loadFromFile\(") S
+(spaceMeteors_002.png) str
+("\);) p n
+(                    PlanetsInSpace[i].texture.setSmooth\() S
+(true) k
+(\);) p n
+(                    PlanetsInSpace[i].shape.setTexture\(PlanetsInSpace[i].texture) N
+(\);) N
+(                }) N
+(                ) S
+(else) K
+( ) p
+(if) K
+( \(25 < PlanetsInSpace[i].life && PlanetsInSpace[i].life <) p n
+(= 50\)) N
+(                {) N
+(                    PlanetsInSpace[i].texture.loadFromFile\(") S
+(spaceMeteors_003.png) str
+("\);) p n
+(                    PlanetsInSpace[i].texture.setSmooth\() S
+(true) k
+(\);) p n
+(                    PlanetsInSpace[i].shape.setTexture\(PlanetsInSpace[i].texture) N
+(\);) N
+(                }) N
+(                ) S
+(else) K
+( ) p
+(if) K
+( \(PlanetsInSpace[i].life <= 25\)) p n
+(                {) N
+(                    PlanetsInSpace[i].texture.loadFromFile\(") S
+(spaceMeteors_004.png) str
+("\);) p n
+(                    PlanetsInSpace[i].texture.setSmooth\() S
+(true) k
+(\);) p n
+(                    PlanetsInSpace[i].shape.setTexture\(PlanetsInSpace[i].texture) N
+(\);) N
+(                }) N
+() N
+(                ) S
+(if) K
+( \(!PlanetsInSpace[i].isDead\(\)\)) p n
+(                {) N
+(                    window.draw\(PlanetsInSpace[i].shape\);) N
+(                }) N
+(                    ) N
+(            }) N
+() N
+(            ) S
+(if) K
+( \( !p2.isDead\(\) \) window.draw\(p2.shape\);) p n
+(            ) S
+(else) K
+( {) p n
+(                cout << ") S
+(\\n) str
+(" << p.GetName\(\) << ") p
+(  Wiiiinnnnnsssss!!!!) str
+(";) p n
+(                PlayerVictory.setString\(p.GetName\(\)+") S
+(  Wins!!!!) str
+("\);) p n
+(                ) N
+(definitions.cpp) (Page 14/15) (d\303\251c. 08, 19 23:57) title
+border
+grestore
+(Printed by Romeo) rhead
+(definitions.cpp) (7/8) (lundi d\303\251cembre 09, 2019) footer
+end % of iso1dict
+pagesave restore
+showpage
+%%Page: (15) 8
+%%BeginPageSetup
+/pagesave save def
+sh 0 translate 90 rotate
+%%EndPageSetup
+iso1dict begin
+gsave
+llx lly 12 add translate
+/v 0 store
+/x0 x v get 3.147420 add sx cw mul add store
+/y0 y v get bfs th add sub store
+x0 y0 moveto
+(            }) p n
+(            ) S
+(if) K
+( \( !p.isDead\(\) \) window.draw\(p.shape\);) p n
+(            ) S
+(else) K
+( { ) p n
+(                cout << ") S
+(\\n) str
+(" << p2.GetName\(\) << ") p
+(  Wiiiinnnnnsssss!!!!) str
+(";) p n
+(                PlayerVictory.setString\(p2.GetName\(\)+") S
+(  Wins!!!!) str
+("\);) p n
+(            }) N
+(        ) S
+(//Donees du joueur 1) c n
+(        playerData.setString\(p.GetName\(\) + ") p
+(\\nHP:   ) str
+(" + to_string\(p.life\)\);) p n
+(        ) S
+(//Donnees du joueur 2) c n
+(        player2Data.setString\(p2.GetName\(\) + ") p
+(\\nHP:   ) str
+(" + to_string\(p2.life\)\);) p n
+() N
+(        window.draw\(playerData\);) N
+(        window.draw\(player2Data\);) N
+(        window.draw\(PlayerVictory\);) N
+(        window.display\(\);) N
+() N
+(    }) N
+() N
+(    ) S
+(return) K
+( 0;) p n
+(}) N
+() N
+(definitions.cpp) (Page 15/15) (d\303\251c. 08, 19 23:57) title
+border
+grestore
+(Printed by Romeo) rhead
+(definitions.cpp) (8/8) (lundi d\303\251cembre 09, 2019) footer
+end % of iso1dict
+pagesave restore
+showpage
+
+%%Trailer
+end
+%%EOF

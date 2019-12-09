@@ -284,7 +284,7 @@ class Shot: public space_object {
 
         void externalForce(space_object& a){
             
-            cout << "distance de la planete: " << distance(a);
+            //cout << "distance de la planete: " << distance(a);
 
             x[2] += a.gravity * (a.x[0]-x[0])*pow(distance(a),-3);
             y[2] += a.gravity * (a.y[0]-y[0])*pow(distance(a),-3);
