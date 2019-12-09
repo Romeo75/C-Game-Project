@@ -593,7 +593,7 @@ int main(){
         RenderWindow window(VideoMode(windowSizeX, windowSizeY), "Spacecraft Movement");
         window.setFramerateLimit(40);
         Texture t1;
-        t1.loadFromFile("blue.png");
+        t1.loadFromFile("res/blue.png");
         t1.setRepeated(true);
         Sprite sFond(t1,IntRect(0,0,windowSizeX,windowSizeY));
 
@@ -613,23 +613,23 @@ int main(){
 
     /// Objects ....
 
-        ship p(name1, gravity, life, Color::Green, "spaceShip_01.png", sizeX, sizeY, maxShots, windowSizeX, windowSizeY, vmax, x, y, phy);
+        ship p(name1, gravity, life, Color::Green, "res/spaceShip_01.png", sizeX, sizeY, maxShots, windowSizeX, windowSizeY, vmax, x, y, phy);
 
         vector<planet> PlanetsInSpace;
-        planet mars( "Mars", gravity, life, Color::Blue, "meteor.png", sizePX, sizePY, windowSizeX, windowSizeY, vmax, x, y, phy );
+        planet mars( "Mars", gravity, life, Color::Blue, "res/meteor.png", sizePX, sizePY, windowSizeX, windowSizeY, vmax, x, y, phy );
         
         x[0]=windowSizeX*3/4.;y[0]=windowSizeY*0.5;
         sizeX = 106, sizeY = 80;
-        ship2 p2(name2, gravity, life, Color::Green, "spaceShip_02.png", sizeX, sizeY, maxShots, windowSizeX, windowSizeY, vmax, x, y, phy);
-        planet moon("Moon", gravity, life, Color::Blue, "meteor.png", sizePX, sizePY, windowSizeX, windowSizeY, vmax, x, y, phy );
+        ship2 p2(name2, gravity, life, Color::Green, "res/spaceShip_02.png", sizeX, sizeY, maxShots, windowSizeX, windowSizeY, vmax, x, y, phy);
+        planet moon("Moon", gravity, life, Color::Blue, "res/meteor.png", sizePX, sizePY, windowSizeX, windowSizeY, vmax, x, y, phy );
 
         PlanetsInSpace.push_back(mars);
         PlanetsInSpace.push_back(moon);
         
         Font mainFont;
-        mainFont.loadFromFile("kenvector_future.ttf");
+        mainFont.loadFromFile("res/kenvector_future.ttf");
         Font thinFont;
-        thinFont.loadFromFile("kenvector_future_thin.ttf");
+        thinFont.loadFromFile("res/kenvector_future_thin.ttf");
 
         Text PlayerVictory;
         PlayerVictory.setFont(mainFont);
@@ -713,7 +713,7 @@ int main(){
             for (int i = 0 ; i < (p.ShotsInSpace).size(); i++){
                 
                 (p.ShotsInSpace[i]).UpdatePosition();    
-                (p.ShotsInSpace[i]).texture.loadFromFile("spaceMissil.png");
+                (p.ShotsInSpace[i]).texture.loadFromFile("res/spaceMissil.png");
                 (p.ShotsInSpace[i]).shape.setTexture((p.ShotsInSpace[i]).texture);
               //(p.ShotsInSpace[i]).GetAll();
                 (p.ShotsInSpace[i]).phy = 180 + (180/M_PI) * acos(((p.ShotsInSpace[i]).x[1]) * pow( sqrt( pow(((p.ShotsInSpace[i]).x[1]), 2) + pow( ((p.ShotsInSpace[i]).y[1]), 2) ) ,-1));
@@ -818,25 +818,25 @@ int main(){
                 
                 if (75 < PlanetsInSpace[i].life && PlanetsInSpace[i].life <= 100)
                 {
-                    PlanetsInSpace[i].texture.loadFromFile("spaceMeteors_001.png");
+                    PlanetsInSpace[i].texture.loadFromFile("res/spaceMeteors_001.png");
                     PlanetsInSpace[i].texture.setSmooth(true);
                     PlanetsInSpace[i].shape.setTexture(PlanetsInSpace[i].texture);
                 }
                 else if ( 50 < PlanetsInSpace[i].life && PlanetsInSpace[i].life <= 75)
                 {
-                    PlanetsInSpace[i].texture.loadFromFile("spaceMeteors_002.png");
+                    PlanetsInSpace[i].texture.loadFromFile("res/spaceMeteors_002.png");
                     PlanetsInSpace[i].texture.setSmooth(true);
                     PlanetsInSpace[i].shape.setTexture(PlanetsInSpace[i].texture);
                 }
                 else if (25 < PlanetsInSpace[i].life && PlanetsInSpace[i].life <= 50)
                 {
-                    PlanetsInSpace[i].texture.loadFromFile("spaceMeteors_003.png");
+                    PlanetsInSpace[i].texture.loadFromFile("res/spaceMeteors_003.png");
                     PlanetsInSpace[i].texture.setSmooth(true);
                     PlanetsInSpace[i].shape.setTexture(PlanetsInSpace[i].texture);
                 }
                 else if (PlanetsInSpace[i].life <= 25)
                 {
-                    PlanetsInSpace[i].texture.loadFromFile("spaceMeteors_004.png");
+                    PlanetsInSpace[i].texture.loadFromFile("res/spaceMeteors_004.png");
                     PlanetsInSpace[i].texture.setSmooth(true);
                     PlanetsInSpace[i].shape.setTexture(PlanetsInSpace[i].texture);
                 }
